@@ -1,9 +1,9 @@
-package olyalya
+package instance
 
 import "testing"
 
 func TestGetSet(t *testing.T) {
-	o := InitOlyalya()
+	o := New()
 	o.Set("foo", "bar")
 	if o.Get("foo") != "bar" {
 		t.Error("Get")
@@ -16,7 +16,7 @@ func TestGetSet(t *testing.T) {
 }
 
 func TestHas(t *testing.T) {
-	o := InitOlyalya()
+	o := New()
 	if o.Has("somekey") {
 		t.Error("Key 'somekey' exists")
 	}
@@ -28,7 +28,7 @@ func TestHas(t *testing.T) {
 }
 
 func TestLen(t *testing.T) {
-	o := InitOlyalya()
+	o := New()
 	if o.Len() != 0 {
 		t.Errorf("Length is %d", o.Len())
 	}
@@ -45,7 +45,7 @@ func TestLen(t *testing.T) {
 }
 
 func TestKeys(t *testing.T) {
-	o := InitOlyalya()
+	o := New()
 	ts := map[string]int{
 		"one": 1,
 		"two": 2,

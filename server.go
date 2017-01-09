@@ -6,6 +6,7 @@ import (
 	"log"
 	"encoding/json"
 	"github.com/dzyanis/olyalya/database"
+	"github.com/gorilla/pat"
 )
 
 var (
@@ -18,12 +19,16 @@ var (
 )
 
 func main() {
-	http.HandleFunc("/", handlerInfo)
-	http.HandleFunc("/db/create", handlerDatabaseCreate)
+	var router = pat.New();
 
-	//http.HandleFunc("/set", handlerSet)
-	//http.HandleFunc("/get", handlerGet)
-	//http.HandleFunc("/delete", handlerDelete)
+	router.Post("/db/create", handlerDatabaseCreate)
+
+	router.Post("/db/{instance}/set", handlerInstanceSet)
+	router.Get("/db/{instance}/get/{key}", handlerInstanceGet)
+	router.Get("/db/{instance}", handlerInstanceInfo)
+
+	router.Get("/", handlerInfo)
+	http.Handle("/", router)
 
 	log.Printf("Version %s listening on %s", Version, *httpAddress)
 	log.Fatal(http.ListenAndServe(*httpAddress, nil))
@@ -31,13 +36,12 @@ func main() {
 
 func handlerDatabaseCreate(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
-	data := map[string]string{}
-	err := decoder.Decode(&data)
-	if err != nil {
-		panic(err)
-	}
 	defer r.Body.Close()
 
+	data := map[string]string{}
+	if err := decoder.Decode(&data); err != nil {
+		// error
+	}
 	db.Create(data["name"])
 
 	request := map[string]interface{}{
@@ -62,24 +66,51 @@ func handlerInfo(w http.ResponseWriter, r *http.Request) {
 	handlerJson(w, http.StatusOK, request)
 }
 
-//func handlerSet(w http.ResponseWriter, r *http.Request) {
-//	//key   := r.URL.Query().Get("key")
-//	//value := r.URL.Query().Get("value")
-//	//Base.Set(key, value)
-//	request := map[string]interface{}{
-//		"status": "OK",
-//	}
-//	handlerJson(w, http.StatusOK, request)
-//}
-//
-//func handlerGet(w http.ResponseWriter, r *http.Request) {
-//	key := r.URL.Query().Get("key")
-//	fmt.Fprintf(w, "value: %+v!", Base.Get(key))
-//}
-//
-//func handlerDelete(w http.ResponseWriter, r *http.Request) {
-//	flag.Parse()
-//	key   := r.URL.Query().Get("key")
-//	Base.Delete(key)
-//	fmt.Fprint(w, "OK!")
-//}
+func handlerInstanceInfo(w http.ResponseWriter, r *http.Request) {
+	instanceName := r.URL.Query().Get(":instance")
+	instance := db.Get(instanceName)
+	request := map[string]interface{}{
+		"status": "OK",
+		"instanceName": instanceName,
+		"len": instance.Len(),
+		"keys": instance.Keys(),
+	}
+	handlerJson(w, http.StatusOK, request)
+}
+
+func handlerInstanceGet(w http.ResponseWriter, r *http.Request) {
+	instanceName := r.URL.Query().Get(":instance")
+	instance := db.Get(instanceName)
+
+	keyName := r.URL.Query().Get(":key")
+
+	request := map[string]interface{}{
+		"status": "OK",
+		"exist": instance.Has(keyName),
+		"value": instance.Get(keyName),
+	}
+	handlerJson(w, http.StatusOK, request)
+}
+
+func handlerInstanceSet(w http.ResponseWriter, r *http.Request) {
+	instanceName := r.URL.Query().Get(":instance")
+	instance := db.Get(instanceName)
+
+	decoder := json.NewDecoder(r.Body)
+	defer r.Body.Close()
+
+	data := map[string]string{}
+	if err := decoder.Decode(&data); err != nil {
+		// error
+	}
+
+	for k, v := range data {
+		instance.Set(k, v)
+	}
+
+	request := map[string]interface{}{
+		"status": "OK",
+		"data": data,
+	}
+	handlerJson(w, http.StatusOK, request)
+}

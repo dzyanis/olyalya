@@ -29,7 +29,7 @@ func (db DataBase) Delete(key string) {
 	delete(db.instances, key)
 }
 
-func (db DataBase) Get(key string) interface{} {
+func (db DataBase) Get(key string) instance.Instance {
 	v, _ := db.instances[key]
 	return v
 }

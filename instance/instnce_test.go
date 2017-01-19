@@ -1,6 +1,9 @@
 package instance
 
-import "testing"
+import (
+	"testing"
+	"reflect"
+)
 
 func TestGetSet(t *testing.T) {
 	o := New()
@@ -12,6 +15,17 @@ func TestGetSet(t *testing.T) {
 	o.Set("number", 42)
 	if o.Get("number") != 42 {
 		t.Error("Get")
+	}
+}
+
+func TestGetSetArr(t *testing.T) {
+	o := New()
+
+	arr := []string{"one", "two", "three"}
+	o.Set("arr", arr)
+	as := o.Get("arr");
+	if reflect.TypeOf(as).String() != "[]string" {
+		t.Errorf("Function has returned the wrong type %s", reflect.TypeOf(as))
 	}
 }
 

@@ -4,6 +4,9 @@ import (
 	"net/http"
 	"flag"
 	"log"
+	"fmt"
+	"io/ioutil"
+	"reflect"
 	"encoding/json"
 	"github.com/dzyanis/olyalya/database"
 	"github.com/gorilla/pat"
@@ -11,20 +14,46 @@ import (
 
 var (
 	db = database.New()
-	Version = "0.0"
+	Version = "0.0.0"
 )
 
 var (
 	httpAddress = flag.String("http.addr", ":8080", "HTTP listen address")
 )
 
+type RespondJson map[string]interface{}
+
+type RequestJsonString struct {
+	Key string	`json:"name"`
+	Value string	`json:"value"`
+	Expire int	`json:"expire"`
+}
+type RequestJsonArray struct {
+	Key string	`json:"name"`
+	Value []string	`json:"value"`
+	Expire int	`json:"expire"`
+}
+type RequestJsonHash struct {
+	Key string		`json:"name"`
+	Value map[string]string	`json:"value"`
+	Expire int		`json:"expire"`
+}
+
 func main() {
 	var router = pat.New();
 
 	router.Post("/db/create", handlerDatabaseCreate)
 
+	router.Post("/db/{instance}/arr/set", handlerInstanceArraySet)
+	//router.Post("/db/{instance}/arr/get/{index}", handlerInstanceArrayGet)
+	//router.Post("/db/{instance}/arr/delete/{key}", handlerInstanceArrayDelete)
+
+	router.Post("/db/{instance}/hash/set", handlerInstanceHashSet)
+
 	router.Post("/db/{instance}/set", handlerInstanceSet)
 	router.Get("/db/{instance}/get/{key}", handlerInstanceGet)
+	router.Delete("/db/{instance}/delete/{key}", handlerInstanceDelete)
+
 	router.Get("/db/{instance}", handlerInstanceInfo)
 
 	router.Get("/", handlerInfo)
@@ -34,21 +63,87 @@ func main() {
 	log.Fatal(http.ListenAndServe(*httpAddress, nil))
 }
 
+func handlerInstanceArraySet(w http.ResponseWriter, r *http.Request) {
+	body, err := ioutil.ReadAll(r.Body);
+	defer r.Body.Close()
+	if  err != nil {
+		handlerJsonError(w, err)
+		return
+	}
+
+	res := new(RequestJsonArray)
+	err = json.Unmarshal([]byte(body), &res)
+	if  err != nil {
+		handlerJsonError(w, err)
+		return
+	}
+
+	instanceName := r.URL.Query().Get(":instance")
+	log.Printf("handlerInstanceArraySet: %#v, %s", res, reflect.TypeOf(res.Value))
+
+	if !db.Has(instanceName) {
+		err = fmt.Errorf("Instance `%s` doesn't exist", instanceName)
+		handlerJsonError(w, err)
+	} else {
+		db.Get(instanceName).Set(res.Key, res.Value)
+		handlerJson(w, http.StatusOK, &RespondJson{
+			"status": "OK",
+			"exist": db.Has(res.Key),
+			"value": res.Value,
+			"type": reflect.TypeOf(res.Value),
+		})
+	}
+}
+
+func handlerInstanceHashSet(w http.ResponseWriter, r *http.Request) {
+	body, err := ioutil.ReadAll(r.Body);
+	defer r.Body.Close()
+	if  err != nil {
+		handlerJsonError(w, err)
+		return
+	}
+
+	res := new(RequestJsonHash)
+	err = json.Unmarshal([]byte(body), &res)
+	if  err != nil {
+		handlerJsonError(w, err)
+		return
+	}
+
+	instanceName := r.URL.Query().Get(":instance")
+	log.Printf("handlerInstanceHashSet: %#v, %s", res, reflect.TypeOf(res.Value))
+
+	if !db.Has(instanceName) {
+		err = fmt.Errorf("Instance `%s` doesn't exist", instanceName)
+		handlerJsonError(w, err)
+	} else {
+		db.Get(instanceName).Set(res.Key, res.Value)
+		handlerJson(w, http.StatusOK, &RespondJson{
+			"status": "OK",
+			"exist": db.Has(res.Key),
+			"value": res.Value,
+			"type": reflect.TypeOf(res.Value),
+		})
+	}
+}
+
 func handlerDatabaseCreate(w http.ResponseWriter, r *http.Request) {
-	decoder := json.NewDecoder(r.Body)
+	data := map[string]string{}
+	err := json.NewDecoder(r.Body).Decode(&data)
 	defer r.Body.Close()
 
-	data := map[string]string{}
-	if err := decoder.Decode(&data); err != nil {
-		// error
+	if err == nil {
+		db.Create(data["name"])
+		handlerJson(w, http.StatusOK, &RespondJson{
+			"status": "OK",
+			"body": data,
+		})
+	} else {
+		handlerJson(w, http.StatusInternalServerError, &RespondJson{
+			"status": "ERROR",
+			"message": err,
+		})
 	}
-	db.Create(data["name"])
-
-	request := map[string]interface{}{
-		"status": "OK",
-		"body": data,
-	}
-	handlerJson(w, 200, request)
 }
 
 func handlerJson(w http.ResponseWriter, code int, object interface{}) {
@@ -57,25 +152,37 @@ func handlerJson(w http.ResponseWriter, code int, object interface{}) {
 	json.NewEncoder(w).Encode(object)
 }
 
+func handlerJsonError(w http.ResponseWriter, err error) {
+	log.Println(err)
+	handlerJson(w, http.StatusInternalServerError, &RespondJson{
+		"status": "ERROR",
+		"message": err,
+	})
+}
+
+func handlerJsonOk(w http.ResponseWriter) {
+	handlerJson(w, http.StatusOK, &RespondJson{
+		"status": "OK",
+	})
+}
+
 func handlerInfo(w http.ResponseWriter, r *http.Request) {
-	request := map[string]interface{}{
+	handlerJson(w, http.StatusOK, RespondJson{
 		"status": "OK",
 		"len": db.Len(),
 		"keys": db.Keys(),
-	}
-	handlerJson(w, http.StatusOK, request)
+	})
 }
 
 func handlerInstanceInfo(w http.ResponseWriter, r *http.Request) {
 	instanceName := r.URL.Query().Get(":instance")
 	instance := db.Get(instanceName)
-	request := map[string]interface{}{
+	handlerJson(w, http.StatusOK, &RespondJson{
 		"status": "OK",
 		"instanceName": instanceName,
 		"len": instance.Len(),
 		"keys": instance.Keys(),
-	}
-	handlerJson(w, http.StatusOK, request)
+	})
 }
 
 func handlerInstanceGet(w http.ResponseWriter, r *http.Request) {
@@ -84,33 +191,55 @@ func handlerInstanceGet(w http.ResponseWriter, r *http.Request) {
 
 	keyName := r.URL.Query().Get(":key")
 
-	request := map[string]interface{}{
+	value := instance.Get(keyName)
+	handlerJson(w, http.StatusOK, &RespondJson{
 		"status": "OK",
 		"exist": instance.Has(keyName),
-		"value": instance.Get(keyName),
-	}
-	handlerJson(w, http.StatusOK, request)
+		"value": value,
+		"type": reflect.TypeOf(value),
+	})
 }
 
-func handlerInstanceSet(w http.ResponseWriter, r *http.Request) {
+func handlerInstanceDelete(w http.ResponseWriter, r *http.Request) {
 	instanceName := r.URL.Query().Get(":instance")
 	instance := db.Get(instanceName)
 
-	decoder := json.NewDecoder(r.Body)
-	defer r.Body.Close()
+	keyName := r.URL.Query().Get(":key")
+	instance.Delete(keyName)
 
-	data := map[string]string{}
-	if err := decoder.Decode(&data); err != nil {
-		// error
-	}
-
-	for k, v := range data {
-		instance.Set(k, v)
-	}
-
-	request := map[string]interface{}{
+	handlerJson(w, http.StatusOK, &RespondJson{
 		"status": "OK",
-		"data": data,
+	})
+}
+
+func handlerInstanceSet(w http.ResponseWriter, r *http.Request) {
+	body, err := ioutil.ReadAll(r.Body);
+	defer r.Body.Close()
+	if  err != nil {
+		handlerJsonError(w, err)
+		return
 	}
-	handlerJson(w, http.StatusOK, request)
+
+	res := new(RequestJsonString)
+	err = json.Unmarshal([]byte(body), &res)
+	if  err != nil {
+		handlerJsonError(w, err)
+		return
+	}
+
+	instanceName := r.URL.Query().Get(":instance")
+	log.Printf("handlerInstanceSet: %#v, %s", res, reflect.TypeOf(res.Value))
+
+	if !db.Has(instanceName) {
+		err = fmt.Errorf("Instance `%s` doesn't exist", instanceName)
+		handlerJsonError(w, err)
+	} else {
+		db.Get(instanceName).Set(res.Key, res.Value)
+		handlerJson(w, http.StatusOK, &RespondJson{
+			"status": "OK",
+			"exist": db.Has(res.Key),
+			"value": res.Value,
+			"type": reflect.TypeOf(res.Value),
+		})
+	}
 }

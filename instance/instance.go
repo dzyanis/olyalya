@@ -18,7 +18,14 @@ func New() Instance {
 func (o Instance) Set(key string, value interface{}) {
 	o.Lock()
 	defer o.Unlock()
-	o.base[key] = value
+	switch value.(type) {
+	case map[string]string:
+		o.base[key] = value
+	case []string:
+		o.base[key] = value
+	case string:
+		o.base[key] = value
+	}
 }
 
 func (o Instance) Has(key string) bool {

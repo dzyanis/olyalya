@@ -1,22 +1,20 @@
-package database
+package server
 
-import (
-	"github.com/dzyanis/olyalya/instance"
-)
+type DataBaseTypeInstances map[string]*Instance
 
 type DataBase struct {
-	instances map[string]instance.Instance
+	instances DataBaseTypeInstances
 }
 
-func New() *DataBase {
+func NewDatabase() *DataBase {
 	return &DataBase{
-		instances: make(map[string]instance.Instance),
+		instances: make(DataBaseTypeInstances),
 	}
 }
 
 func (db *DataBase) Create(name string) {
 	if !db.Has(name) {
-		db.instances[name] = instance.New()
+		db.instances[name] = NewInstance()
 	}
 }
 
@@ -29,7 +27,7 @@ func (db DataBase) Delete(key string) {
 	delete(db.instances, key)
 }
 
-func (db DataBase) Get(key string) instance.Instance {
+func (db DataBase) Get(key string) *Instance {
 	v, _ := db.instances[key]
 	return v
 }

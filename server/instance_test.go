@@ -11,14 +11,14 @@ func TestGetSet(t *testing.T) {
 	// string
 	bar := "bar"
 	o.Set("foo", bar)
-	v := o.Get("foo")
+	v, _ := o.Get("foo")
 	if v != bar {
 		t.Error("Method Get returned unexpected result: %#v != %#v", bar, v, reflect.TypeOf(v))
 	}
 
 	// string
-	o.Set("number", "42", 100000)
-	v = o.Get("number")
+	o.Set("number", "42")
+	v, _ = o.Get("number")
 	if v != "42" {
 		t.Error("Method Get returned unexpected result:", v)
 	}
@@ -34,8 +34,8 @@ func TestGetSetArr(t *testing.T) {
 	o := NewInstance()
 
 	arr := []string{"one", "two", "three"}
-	o.Set("arr", arr, 0)
-	as := o.Get("arr")
+	o.Set("arr", arr)
+	as, _ := o.Get("arr")
 	if reflect.TypeOf(as).String() != "[]string" {
 		t.Errorf("Function has returned the wrong type %s", reflect.TypeOf(as))
 	}
@@ -47,7 +47,7 @@ func TestHas(t *testing.T) {
 		t.Error("Key 'somekey' exists")
 	}
 
-	o.Set("somekey", "somekey", 0)
+	o.Set("somekey", "somekey")
 	if !o.Has("somekey") {
 		t.Error("Key 'somekey' doesn't exist")
 	}
@@ -59,12 +59,12 @@ func TestLen(t *testing.T) {
 		t.Errorf("Length is %d", o.Len())
 	}
 
-	o.Set("test_len", "test_len", 0)
+	o.Set("test_len", "test_len")
 	if o.Len() != 1 {
 		t.Errorf("Length is %d", o.Len())
 	}
 
-	o.Delete("test_len")
+	o.Del("test_len")
 	if o.Len() != 0 {
 		t.Errorf("Length is %d", o.Len())
 	}
@@ -80,7 +80,7 @@ func TestKeys(t *testing.T) {
 	}
 
 	for k, v := range ts {
-		o.Set(k, v, 0)
+		o.Set(k, v)
 	}
 
 	for _, j := range o.Keys() {
@@ -94,13 +94,13 @@ func TestArrayGet(t *testing.T) {
 	o := NewInstance()
 	o.Set("arr", []string{"0", "1", "2", "3"})
 
-	_, err := o.ArrGet("arr", 1000)
+	_, err := o.ArrGet("arr", 4)
 	if err==nil {
 		t.Error("Error was expected")
 	}
 
-	two, err := o.ArrGet("arr", 2)
-	if two!="2" {
+	two, err := o.ArrGet("arr", 3)
+	if two!="3" {
 		t.Error("Wrong value")
 	}
 
@@ -130,19 +130,19 @@ func TestArraySetAdd(t *testing.T) {
 	o.Set("arr", []string{"0", "1", "2", "3"})
 
 	o.ArrAdd("arr", "four")
-	arr2 := o.Get("arr").([]string)
-	if len(arr2)!=5 {
+	arr2, _ := o.Get("arr")
+	if len(arr2.([]string))!=5 {
 		t.Error("Length should be 4")
 	}
 
 	o.ArrSet("arr", 4, "four")
-	arr2 = o.Get("arr").([]string)
+	arr2, _ = o.Get("arr")
 	two, err := o.ArrGet("arr", 2)
 	if err!=nil {
 		t.Error(err)
 	}
-	if two!=arr2[2] {
-		t.Errorf("Values is not equiel: '%v' != '%v'", two, arr2[2])
+	if two!=arr2.([]string)[2] {
+		t.Errorf("Values is not equiel: '%v' != '%v'", two, arr2.([]string)[2])
 	}
 }
 

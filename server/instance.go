@@ -19,7 +19,8 @@ type Instance struct {
 var (
 	ErrInstanceUnknownType = errors.New("Unknown type")
 	ErrInstanceNotExist = errors.New("Item Not exist")
-	ErrInstanceConvertToInt = errors.New("Convert to int")
+	//ErrInstanceConvertToInt = errors.New("Convert to int")
+	ErrInstanceValueWasExpired = errors.New("Value was expired")
 
 	ErrInstanceValueIsNotArr = errors.New("Value is not array")
 	ErrInstanceArrIndexIsNotExist = errors.New("Index is not exist")
@@ -35,29 +36,19 @@ func NewInstance() *Instance {
 	}
 }
 
-func (o *Instance) Set(key string, value interface{}, params... interface{}) error {
+func (o *Instance) Set(name string, value interface{}) error {
 	o.Lock()
 	defer o.Unlock()
 
 	switch reflect.TypeOf(value).Kind() {
 	case reflect.Map:
-		o.set(key, value)
+		o.set(name, value)
 	case reflect.Slice:
-		o.set(key, value)
+		o.set(name, value)
 	case reflect.String:
-		o.set(key, value)
+		o.set(name, value)
 	default:
 		return ErrInstanceUnknownType
-	}
-
-	l := len(params)
-	if l > 0 {
-		// @todo looks ugly
-		u, ok := params[0].(int)
-		if !ok {
-			return ErrInstanceConvertToInt
-		}
-		o.setTTL(key, uint(u))
 	}
 
 	return nil
@@ -68,28 +59,39 @@ func (o *Instance) set(k string, v interface{}) error {
 	return nil
 }
 
-func (o *Instance) Has(key string) bool {
+func (o *Instance) SetTTL(name string, ttl uint) error {
+	o.Lock()
+	defer o.Unlock()
+
+	o.setTTL(name, ttl)
+	return nil
+}
+
+func (o *Instance) Has(name string) bool {
 	o.RLock()
 	defer o.RUnlock()
-	_, ok := o.base[key]
+	_, ok := o.base[name]
 	return ok
 }
 
-func (o *Instance) Delete(key string) {
+func (o *Instance) Del(name string) {
 	o.Lock()
 	defer o.Unlock()
-	delete(o.base, key)
-	o.DeleteTLL(key)
+
+	o.del(name)
 }
 
-func (o *Instance) Get(key string) (interface{}) {
+func (o *Instance) Get(name string) (interface{}, error) {
 	o.RLock()
 	defer o.RUnlock()
-	r, ok := o.base[key]
+	r, ok := o.base[name]
 	if !ok {
-		return nil
+		return nil, ErrInstanceHashKeyIsNotExist
 	}
-	return r
+	if o.checkExpired(name) {
+		return nil, ErrInstanceValueWasExpired
+	}
+	return r, nil
 }
 
 func (o *Instance) Len() int {
@@ -99,13 +101,16 @@ func (o *Instance) Len() int {
 	return l
 }
 
-func (o *Instance) ArrSet(key string, index uint, value string) error {
+func (o *Instance) ArrSet(name string, index uint, value string) error {
 	o.Lock()
 	defer o.Unlock()
 
-	record, ok := o.base[key]
+	record, ok := o.base[name]
 	if !ok {
 		return ErrInstanceNotExist
+	}
+	if o.checkExpired(name) {
+		return ErrInstanceValueWasExpired
 	}
 
 	s := reflect.ValueOf(record)
@@ -118,13 +123,16 @@ func (o *Instance) ArrSet(key string, index uint, value string) error {
 	return nil
 }
 
-func (o *Instance) ArrAdd(key string, value string) error {
+func (o *Instance) ArrAdd(name string, value string) error {
 	o.Lock()
 	defer o.Unlock()
 
-	record, ok := o.base[key]
+	record, ok := o.base[name]
 	if !ok {
 		return ErrInstanceNotExist
+	}
+	if o.checkExpired(name) {
+		return ErrInstanceValueWasExpired
 	}
 
 	s := reflect.ValueOf(record)
@@ -132,40 +140,46 @@ func (o *Instance) ArrAdd(key string, value string) error {
 		return ErrInstanceValueIsNotArr
 	}
 
-	o.base[key] = append(o.base[key].([]string), value)
+	o.base[name] = append(o.base[name].([]string), value)
 
 	return nil
 }
 
-func (o *Instance) ArrDel(key string, index uint) error {
+func (o *Instance) ArrDel(name string, index uint) error {
 	o.Lock()
 	defer o.Unlock()
 
-	err := o.arrAccess(key, index)
+	err := o.arrAccess(name, index)
 	if err!=nil {
 		return err
 	}
+	if o.checkExpired(name) {
+		return nil
+	}
 
-	sl := o.base[key].([]string)
-	o.base[key] = append(sl[:index], sl[index+1:]...)
+	sl := o.base[name].([]string)
+	o.base[name] = append(sl[:index], sl[index+1:]...)
 
 	return nil
 }
 
-func (o *Instance) ArrGet(key string, index uint) (string, error) {
+func (o *Instance) ArrGet(name string, index uint) (string, error) {
 	o.RLock()
 	defer o.RUnlock()
 
-	err := o.arrAccess(key, index)
+	err := o.arrAccess(name, index)
 	if err!=nil {
 		return "", err
 	}
+	if o.checkExpired(name) {
+		return "", ErrInstanceValueWasExpired
+	}
 
-	return o.base[key].([]string)[index], nil
+	return o.base[name].([]string)[index], nil
 }
 
-func (o *Instance) arrAccess(key string, index uint) error {
-	record, ok := o.base[key]
+func (o *Instance) arrAccess(name string, index uint) error {
+	record, ok := o.base[name]
 	if !ok {
 		return ErrInstanceNotExist
 	}
@@ -176,7 +190,7 @@ func (o *Instance) arrAccess(key string, index uint) error {
 	}
 
 	l := len(record.([]string))
-	if uint(l) < index {
+	if index > uint(l)-1 {
 		return ErrInstanceArrIndexIsNotExist
 	}
 
@@ -191,6 +205,9 @@ func (o *Instance) HashSet(name string, key string, value string) error {
 	if !ok {
 		return ErrInstanceNotExist
 	}
+	if o.checkExpired(name) {
+		return ErrInstanceValueWasExpired
+	}
 
 	rf := reflect.ValueOf(record)
 	if rf.Kind() != reflect.Map {
@@ -202,6 +219,20 @@ func (o *Instance) HashSet(name string, key string, value string) error {
 	return nil
 }
 
+func (o *Instance) del(name string) {
+	delete(o.base, name)
+	o.delTLL(name)
+}
+
+func (o *Instance) checkExpired(name string) bool {
+	if o.isExpire(name) {
+		o.del(name)
+		return true
+	}
+
+	return false
+}
+
 func (o *Instance) HashDel(name string, key string) error {
 	o.Lock()
 	defer o.Unlock()
@@ -210,10 +241,19 @@ func (o *Instance) HashDel(name string, key string) error {
 	if !ok {
 		return ErrInstanceNotExist
 	}
+	if o.checkExpired(name) {
+		return nil
+	}
 
 	delete(o.base[name].(map[string]string), key)
 
 	return nil
+}
+
+func (o *Instance) DelTTL(name string) {
+	o.RLock()
+	defer o.RUnlock()
+	o.delTLL(name)
 }
 
 func (o *Instance) HashGet(name string, key string) (string, error) {
@@ -223,6 +263,9 @@ func (o *Instance) HashGet(name string, key string) (string, error) {
 	record, ok := o.base[name]
 	if !ok {
 		return "", ErrInstanceNotExist
+	}
+	if o.checkExpired(name) {
+		return "", ErrInstanceValueWasExpired
 	}
 
 	rf := reflect.ValueOf(record)
@@ -238,7 +281,6 @@ func (o *Instance) HashGet(name string, key string) (string, error) {
 	return val, nil
 }
 
-// It work so slow
 func (o *Instance) Keys() []string {
 	o.RLock()
 	defer o.RUnlock()
@@ -257,6 +299,6 @@ func (o *Instance) GetExpiredKeys() []string {
 
 func (o *Instance) Cleaner() {
 	for _, k := range o.GetExpiredKeys() {
-		o.Delete(k);
+		o.Del(k);
 	}
 }

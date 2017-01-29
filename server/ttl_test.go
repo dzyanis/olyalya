@@ -17,12 +17,12 @@ func TestSetGetTTL(t *testing.T) {
 func TestHasTTL(t *testing.T) {
 	o := NewExtensionExpire()
 
-	if o.HasTTL("somekey") {
+	if o.hasTTL("somekey") {
 		t.Error("Key 'somekey' exists")
 	}
 
 	o.setTTL("somekey", 10)
-	if !o.HasTTL("somekey") {
+	if !o.hasTTL("somekey") {
 		t.Error("Key 'somekey' doesn't exist")
 	}
 }
@@ -31,11 +31,11 @@ func TestIsExpireTTL(t *testing.T) {
 	o := NewExtensionExpire()
 
 	o.setTTL("2sec", 2)
-	if o.IsExpire("2sec") {
+	if o.isExpire("2sec") {
 		t.Errorf("Now '%d'. Date '%d' was expired.", CurrentUnixTime(), o.GetTTL("2sec"))
 	}
 	time.Sleep(2*time.Second)
-	if !o.IsExpire("2sec") {
+	if !o.isExpire("2sec") {
 		t.Errorf("Now '%d'. Date '%d' doesn't expired.", CurrentUnixTime(), o.GetTTL("2sec"))
 	}
 }

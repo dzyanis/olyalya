@@ -29,7 +29,7 @@ func (ext *ExtensionExpire) GetTTL(key string) uint {
 	return v
 }
 
-func (ext *ExtensionExpire) HasTTL(key string) bool {
+func (ext *ExtensionExpire) hasTTL(key string) bool {
 	_, ok := ext.ttl[key]
 	return ok
 }
@@ -38,21 +38,22 @@ func (ext *ExtensionExpire) Diff(key string) uint {
 	return ext.GetTTL(key)-CurrentUnixTime()
 }
 
-func (ext *ExtensionExpire) IsExpire(key string) bool {
-	if CurrentUnixTime() >= ext.GetTTL(key) {
+func (ext *ExtensionExpire) isExpire(key string) bool {
+	v, ok := ext.ttl[key]
+	if ok && CurrentUnixTime() >= v {
 		return true
 	}
 	return false
 }
 
-func (ext *ExtensionExpire) DeleteTLL(key string) {
+func (ext *ExtensionExpire) delTLL(key string) {
 	delete(ext.ttl, key)
 }
 
 func (ext *ExtensionExpire) getExpiredKeys() []string {
 	expiredKeys := []string{}
 	for k := range ext.ttl {
-		if ext.IsExpire(k) {
+		if ext.isExpire(k) {
 			_ = append(expiredKeys, k)
 		}
 	}

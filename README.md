@@ -1,6 +1,6 @@
 # Olyalya: In-memory cache
 
-Simple implementation of Redis-like in-memory cache
+Simple implementation of Redis-like in-memory cache database with HTTP/JSON interface
 
 Desired features:
 - Key-value storage with string, lists, dict support

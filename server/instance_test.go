@@ -7,14 +7,26 @@ import (
 
 func TestGetSet(t *testing.T) {
 	o := NewInstance()
-	o.Set("foo", "bar", 0)
-	if o.Get("foo") != "bar" {
-		t.Error("Method Get returned unexpected result:", o.Get("foo"))
+
+	// string
+	bar := "bar"
+	o.Set("foo", bar)
+	v := o.Get("foo")
+	if v != bar {
+		t.Error("Method Get returned unexpected result: %#v != %#v", bar, v, reflect.TypeOf(v))
 	}
 
-	o.Set("number", "42", 0)
-	if o.Get("number") != "42" {
-		t.Error("Method Get returned unexpected result:", o.Get("number"))
+	// string
+	o.Set("number", "42", 100000)
+	v = o.Get("number")
+	if v != "42" {
+		t.Error("Method Get returned unexpected result:", v)
+	}
+
+	// Number
+	err := o.Set("number", 42)
+	if err==nil {
+		t.Error("Method Set expected error")
 	}
 }
 
@@ -23,7 +35,7 @@ func TestGetSetArr(t *testing.T) {
 
 	arr := []string{"one", "two", "three"}
 	o.Set("arr", arr, 0)
-	as := o.Get("arr");
+	as := o.Get("arr")
 	if reflect.TypeOf(as).String() != "[]string" {
 		t.Errorf("Function has returned the wrong type %s", reflect.TypeOf(as))
 	}
@@ -75,5 +87,148 @@ func TestKeys(t *testing.T) {
 		if !o.Has(j) {
 			t.Errorf("Key '%s' was found", j)
 		}
+	}
+}
+
+func TestArrayGet(t *testing.T) {
+	o := NewInstance()
+	o.Set("arr", []string{"0", "1", "2", "3"})
+
+	_, err := o.ArrGet("arr", 1000)
+	if err==nil {
+		t.Error("Error was expected")
+	}
+
+	two, err := o.ArrGet("arr", 2)
+	if two!="2" {
+		t.Error("Wrong value")
+	}
+
+	o.Set("string", "ELLO GOVNA")
+	_, err = o.ArrGet("string", 0)
+	if err==nil {
+		t.Error("Error was expected")
+	}
+}
+
+func TestArrayDel(t *testing.T) {
+	o := NewInstance()
+	o.Set("arr", []string{"0", "1", "2", "3"})
+
+	o.ArrDel("arr", 2)
+	three, err := o.ArrGet("arr", 2)
+	if err!=nil {
+		t.Error(err)
+	}
+	if three!="3" {
+		t.Error("Wrong value")
+	}
+}
+
+func TestArraySetAdd(t *testing.T) {
+	o := NewInstance()
+	o.Set("arr", []string{"0", "1", "2", "3"})
+
+	o.ArrAdd("arr", "four")
+	arr2 := o.Get("arr").([]string)
+	if len(arr2)!=5 {
+		t.Error("Length should be 4")
+	}
+
+	o.ArrSet("arr", 4, "four")
+	arr2 = o.Get("arr").([]string)
+	two, err := o.ArrGet("arr", 2)
+	if err!=nil {
+		t.Error(err)
+	}
+	if two!=arr2[2] {
+		t.Errorf("Values is not equiel: '%v' != '%v'", two, arr2[2])
+	}
+}
+
+func TestHashGet(t *testing.T) {
+	o := NewInstance()
+	o.Set("hash", map[string]string{
+		"zero": "0",
+		"one": "1",
+		"two": "2",
+		"three": "3",
+	})
+
+	_, err := o.HashGet("notexistname", "notexistkey")
+	if err==nil {
+		t.Error("Error was expected")
+	}
+
+	_, err = o.HashGet("hash", "notexistkey")
+	if err==nil {
+		t.Error("Error was expected")
+	}
+
+	one, err := o.HashGet("hash", "one")
+	if one!="1" {
+		t.Error("Wrong value")
+	}
+
+	o.Set("string", "ELLO GOVNA")
+	_, err = o.HashGet("string", "notexistkey")
+	if err==nil {
+		t.Error("Error was expected")
+	}
+}
+
+func TestHashSet(t *testing.T) {
+	o := NewInstance()
+	o.Set("hash", map[string]string{
+		"zero": "0",
+		"one": "1",
+		"two": "2",
+		"three": "3",
+	})
+
+	err := o.HashSet("notexistname", "three", "4")
+	if err==nil {
+		t.Error("Error was expected")
+	}
+
+	err = o.HashSet("hash", "four", "4")
+	four, _ := o.HashGet("hash", "four")
+	if four!="4" {
+		t.Error("Wrong value")
+	}
+
+	_ = o.HashSet("hash", "four", "IV")
+	four, _ = o.HashGet("hash", "four")
+	if four!="IV" {
+		t.Error("Wrong value")
+	}
+}
+
+func TestHashDel(t *testing.T) {
+	o := NewInstance()
+	o.Set("hash", map[string]string{
+		"zero": "0",
+		"one": "1",
+		"two": "2",
+		"three": "3",
+	})
+
+	err := o.HashDel("notexistname", "notexistkey")
+	if err==nil {
+		t.Error("Error was expected")
+	}
+
+	err = o.HashDel("hash", "notexistkey")
+	if err!=nil {
+		t.Error("Error was not expected")
+	}
+
+	err = o.HashDel("hash", "two")
+	if err!=nil {
+		t.Error("Error was not expected")
+	}
+	_, err = o.HashGet("hash", "two")
+	if err==nil {
+		t.Error("Error was expected")
 	}
 }

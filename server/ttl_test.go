@@ -8,7 +8,7 @@ import (
 func TestSetGetTTL(t *testing.T) {
 	o := NewExtensionExpire()
 
-	o.SetTTL("ten", 10)
+	o.setTTL("ten", 10)
 	if o.GetTTL("ten") > CurrentUnixTime()+10 {
 		t.Error("Method Get returned unexpected result:", o.GetTTL("ten"))
 	}
@@ -21,7 +21,7 @@ func TestHasTTL(t *testing.T) {
 		t.Error("Key 'somekey' exists")
 	}
 
-	o.SetTTL("somekey", 10)
+	o.setTTL("somekey", 10)
 	if !o.HasTTL("somekey") {
 		t.Error("Key 'somekey' doesn't exist")
 	}
@@ -30,7 +30,7 @@ func TestHasTTL(t *testing.T) {
 func TestIsExpireTTL(t *testing.T) {
 	o := NewExtensionExpire()
 
-	o.SetTTL("2sec", 2)
+	o.setTTL("2sec", 2)
 	if o.IsExpire("2sec") {
 		t.Errorf("Now '%d'. Date '%d' was expired.", CurrentUnixTime(), o.GetTTL("2sec"))
 	}

@@ -1,10 +1,18 @@
 package server
 
+import (
+	"errors"
+)
+
 type DataBaseTypeInstances map[string]*Instance
 
 type DataBase struct {
 	instances DataBaseTypeInstances
 }
+
+var (
+	ErrDatabaseInstanceNotExist = errors.New("Instance Not Exist")
+)
 
 func NewDatabase() *DataBase {
 	return &DataBase{
@@ -27,9 +35,12 @@ func (db DataBase) Delete(key string) {
 	delete(db.instances, key)
 }
 
-func (db DataBase) Get(key string) *Instance {
-	v, _ := db.instances[key]
-	return v
+func (db DataBase) Get(key string) (*Instance, error) {
+	v, ok := db.instances[key]
+	if !ok {
+		return nil, ErrDatabaseInstanceNotExist
+	}
+	return v, nil
 }
 
 func (db DataBase) Len() int {

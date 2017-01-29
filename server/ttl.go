@@ -20,7 +20,7 @@ func CurrentUnixTime() uint {
 	return uint(time.Now().Unix())
 }
 
-func (ext *ExtensionExpire) SetTTL(key string, second uint) {
+func (ext *ExtensionExpire) setTTL(key string, second uint) {
 	ext.ttl[key] = CurrentUnixTime()+second
 }
 
@@ -49,11 +49,12 @@ func (ext *ExtensionExpire) DeleteTLL(key string) {
 	delete(ext.ttl, key)
 }
 
-// Return True if 'key' was expired and deleted
-func (ext *ExtensionExpire) CheckExpired(key string) bool {
-	if (ext.IsExpire(key)) {
-		ext.DeleteTLL(key)
-		return true
+func (ext *ExtensionExpire) getExpiredKeys() []string {
+	expiredKeys := []string{}
+	for k := range ext.ttl {
+		if ext.IsExpire(k) {
+			_ = append(expiredKeys, k)
+		}
 	}
-	return false
+	return expiredKeys;
 }

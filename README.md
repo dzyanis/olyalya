@@ -1,4 +1,4 @@
-# Olyalya: In-memory cache
+# O(lya-lya): In-memory cache
 
 Simple implementation of Redis-like in-memory cache database with HTTP/JSON interface
 

@@ -23,18 +23,36 @@ func NewClient(addr string, port int) *Client {
 
 // curl -X POST -H 'Content-Type: application/json' 'http://localhost:8080/db/create' -d '{"name": "dz"}'
 func (c *Client) Create(dbName string) error {
-	body, err := json.Marshal(map[string]string{
+	_, err := c.conn.Post("/db/create", map[string]interface{}{
 		"name": dbName,
 	})
 	if err != nil {
 		return err
 	}
-	_, err = c.conn.methodPost("/db/create", body)
-	if err != nil {
-		return err
-	}
 	c.dbName = dbName
 	return nil
+}
+
+func (c *Client) DbList() ([]string, error) {
+	req, err := c.conn.Get("/db/list", map[string]interface{}{})
+	if err != nil {
+		return []string{}, err
+	}
+	defer req.Body.Close()
+
+	type JsonList struct {
+		Count int 	`json:"count"`
+		Names []string	`json:"names"`
+	}
+	var jl JsonList
+
+	decoder := json.NewDecoder(req.Body)
+	err = decoder.Decode(&jl)
+	if err != nil {
+		return []string{}, err
+	}
+
+	return jl.Names, nil
 }
 
 func (c *Client) Select(dbName string) error {
@@ -48,14 +66,10 @@ func (c *Client) Set(name string, value string) error {
 		return ErrClientDbWasNotSelected
 	}
 
-	body, err := json.Marshal(map[string]string{
+	_, err := c.conn.Post(fmt.Sprintf("/db/%s/set", c.dbName), map[string]interface{}{
 		"name": name,
 		"value": value,
 	})
-	if err != nil {
-		return err
-	}
-	_, err = c.conn.methodPost(fmt.Sprintf("/db/%s/set", c.dbName), body)
 	if err != nil {
 		return err
 	}
@@ -64,18 +78,13 @@ func (c *Client) Set(name string, value string) error {
 
 // curl -X GET 'http://localhost:8080/db/dz/get/one'
 func (c *Client) Get(name string) (string, error) {
-	if c.dbName == "" {
-		return "", ErrClientDbWasNotSelected
-	}
-
-	body := []byte{}
-	r, err := c.conn.methodGet(fmt.Sprintf("/db/%s/get/%s", c.dbName, name), body)
-	if err != nil {
-		return "", err
-	}
-	b, err := c.conn.ReadResponse(r)
-	if err != nil {
-		return b, err
-	}
-	return b, nil
+	//r, err := c.conn.Get(fmt.Sprintf("/db/%s/get/%s", c.dbName, name), map[string]interface{}{})
+	//if err != nil {
+	//	return "", err
+	//}
+	//b, err := c.conn.ReadResponse(r)
+	//if err != nil {
+	//	return b, err
+	//}
+	//return b, nil
 }

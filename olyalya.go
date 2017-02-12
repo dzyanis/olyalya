@@ -4,58 +4,83 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"errors"
 	"strings"
+	"github.com/dzyanis/olyalya/cmd"
 	"github.com/dzyanis/olyalya/client"
 )
 
 var (
-	commands = map[string]func(args... interface{}) (string, error){
-		"HELP": handlerHelp,
-		//"EXIT": handlerHelp,
-
-		"LIST": handlerHelp,
-		"CREATE": handlerCreate,
-		"SELECT": handlerHelp,
-		"DESTROY": handlerHelp,
-
-		"GET": handlerGet,
-		"DEL": handlerHelp,
-		"SET": handlerSet,
-		"TTL": handlerHelp,
-		"HAS": handlerHelp,
-
-		"ARR/INDEX/GET": handlerHelp,
-		"ARR/INDEX/SET": handlerHelp,
-		"ARR/INDEX/DEL": handlerHelp,
-
-		"HASH/KEY/GET": handlerHelp,
-		"HASH/KEY/SET": handlerHelp,
-		"HASH/KEY/DEL": handlerHelp,
-	}
-
 	Client *client.Client
+	Cmd = cmd.NewCmd()
 )
 
 func init() {
 	Client = client.NewClient("localhost", 8080)
-}
 
-func handlerHelp (args... interface{}) (string, error) {
-	return "Good luck! You really cool =*", nil
-}
+	Cmd.Add("HELP", &cmd.Command{
+		Title: "Function show information about other functions",
+		Description: "Example: HELP <FUNCTION_NAME>",
+		Handler: func(c *cmd.Cmd, args []string, line string) (string, error) {
+			funcName := ""
+			if len(args) > 1 {
+				funcName = args[1]
+			} else {
+				funcName = args[0]
+			}
 
-func handlerCreate (args... interface{}) (string, error) {
-	err := Client.Create("dz")
-	return "", err
-}
+			command, ok := c.Commands[ funcName ]
+			if !ok {
+				return "", cmd.ErrCommandNotExist
+			}
 
-func handlerSet (args... interface{}) (string, error) {
-	err := Client.Set("author", "Dzyanis Kuzmenka")
-	return "", err
-}
-func handlerGet (args... interface{}) (string, error) {
-	s, err := Client.Get("author")
-	return s, err
+			return fmt.Sprintf("%s\n%s", command.Title, command.Description), nil
+		},
+	})
+
+	Cmd.Add("ECHO", &cmd.Command{
+		Title: "Prints string",
+		Description: "Example: ECHO \"Hello World!\"",
+		Handler: func(c *cmd.Cmd, args []string, line string) (string, error) {
+			if len(args) < 2 {
+				return "", errors.New("Not enough arguments")
+			}
+			s := strings.Trim(args[1], `"`)
+			return s, nil
+		},
+	})
+
+	Cmd.Add("DB/CREATE", &cmd.Command{
+		Title: "Create Database",
+		Description: "Example: DB/CREATE dbname",
+		Handler: func(c *cmd.Cmd, args []string, line string) (string, error) {
+			if len(args) < 2 {
+				return "", errors.New("Not enough arguments")
+			}
+
+			err := Client.Create(args[1])
+			if err!=nil {
+				return "", err
+			}
+			return "OK", nil
+		},
+	})
+
+	Cmd.Add("DB/LIST", &cmd.Command{
+		Title: "Show list of database",
+		Description: "Example: DB/LIST",
+		Handler: func(c *cmd.Cmd, args []string, line string) (string, error) {
+			list, err := Client.DbList()
+			if err!=nil {
+				return "", err
+			}
+			result := ""
+			for i, e := range list {
+				result = result + fmt.Sprintf("%d) %s\n", i+1, e)
+			}
+			return strings.Trim(result, "\n"), nil
+		},
+	})
 }
 
 func main() {
@@ -63,23 +88,18 @@ func main() {
 	fmt.Println("O(lya-lya) greets you")
 
 	for {
-		fmt.Print("-> ")
-		text, _ := reader.ReadString('\n')
-		text = strings.Replace(text, "\n", "", -1)
-
-		for cmd, f := range commands {
-			if strings.Compare("EXIT", text) == 0 {
-				fmt.Println("Bye!")
-				return
-			}
-			if strings.Compare(cmd, text) == 0 {
-				r, e := f()
-				if e!=nil {
-					fmt.Println("ERRPR: ", e.Error())
-				} else {
-					fmt.Println(r)
-				}
-			}
+		fmt.Print("> ")
+		cli, err := reader.ReadString('\n')
+		if err!=nil {
+			fmt.Errorf("ERROR: %s", err)
+			continue
 		}
+
+		result, err := Cmd.Run(cli)
+		if err!=nil {
+			fmt.Errorf("ERROR: %s", err)
+			continue
+		}
+		fmt.Println(result)
 	}
 }

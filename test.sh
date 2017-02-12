@@ -4,6 +4,9 @@ curl -X POST -H 'Content-Type: application/json' 'http://localhost:8080/db/creat
 echo 'GET INFO ABOUT INSTANCE'
 curl -X GET 'http://localhost:8080/db/dz'
 
+echo 'CREATE NEW INSTANCE'
+curl -X POST -H 'Content-Type: application/json' 'http://localhost:8080/db/list' -d '{"name": "dz"}'
+
 echo 'SET STRING'
 curl -X POST -H 'Content-Type: application/json' 'http://localhost:8080/db/dz/set' -d '{"name": "one", "value": "1"}'
 curl -X GET 'http://localhost:8080/db/dz/get/one'

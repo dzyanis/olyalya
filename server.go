@@ -62,6 +62,7 @@ func main() {
 	var router = pat.New();
 
 	router.Post("/db/create", handlerDatabaseCreate)
+	router.Get("/db/list", handlerDatabaseList)
 
 	router.Post("/db/{instance}/set/arr", handlerInstanceSetArray)
 	router.Post("/db/{instance}/arr/index/add", handlerInstanceArrAdd)
@@ -383,6 +384,14 @@ func handlerDatabaseCreate(w http.ResponseWriter, r *http.Request) {
 	handlerJsonOk(w);
 }
 
+func handlerDatabaseList(w http.ResponseWriter, r *http.Request) {
+	handlerJson(w, http.StatusOK, &RespondJson{
+		"status": "OK",
+		"count": db.Len(),
+		"names": db.Keys(),
+	})
+}
+
 func handlerJson(w http.ResponseWriter, code int, object interface{}) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(code)
@@ -400,13 +409,6 @@ func handlerJsonError(w http.ResponseWriter, err error) {
 func handlerJsonOk(w http.ResponseWriter) {
 	handlerJson(w, http.StatusOK, &RespondJson{
 		"status": "OK",
-	})
-}
-
-func handlerInfo(w http.ResponseWriter, r *http.Request) {
-	handlerJson(w, http.StatusOK, RespondJson{
-		"len": db.Len(),
-		"keys": db.Keys(),
 	})
 }
 

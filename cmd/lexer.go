@@ -101,11 +101,11 @@ func (lx *Lexer) IsSpace(b byte) bool {
 	return r.Match([]byte{b})
 }
 
-func (lx *Lexer) Parse(cmd string) error {
+func (lx *Lexer) Parse(cmd string) ([]string, error) {
 	for _, symbol := range cmd {
 		err := lx.Step(byte(symbol))
 		if err!=nil {
-			return err
+			return []string{}, err
 		}
 	}
 
@@ -113,7 +113,7 @@ func (lx *Lexer) Parse(cmd string) error {
 		lx.Close()
 	}
 
-	return nil
+	return lx.terms, nil
 }
 
 func (lx *Lexer) Step(ch byte) error {

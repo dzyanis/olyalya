@@ -61,28 +61,28 @@ type RequestJsonHashItem struct {
 func main() {
 	var router = pat.New();
 
-	router.Post("/db/create", handlerDatabaseCreate)
-	router.Get("/db/list", handlerDatabaseList)
+	router.Post("/inst/create", handlerDatabaseCreate)
+	router.Get("/inst/list", handlerDatabaseList)
 
-	router.Post("/db/{instance}/set/arr", handlerInstanceSetArray)
-	router.Post("/db/{instance}/arr/index/add", handlerInstanceArrAdd)
-	router.Post("/db/{instance}/arr/index/set", handlerInstanceArrSet)
-	router.Get("/db/{instance}/arr/index/get", handlerInstanceArrGet)
-	router.Delete("/db/{instance}/arr/index/del", handlerInstanceArrDel)
+	router.Post("/inst/{instance}/set/arr", handlerInstanceSetArray)
+	router.Post("/inst/{instance}/arr/index/add", handlerInstanceArrAdd)
+	router.Post("/inst/{instance}/arr/index/set", handlerInstanceArrSet)
+	router.Get("/inst/{instance}/arr/index/get", handlerInstanceArrGet)
+	router.Delete("/inst/{instance}/arr/index/del", handlerInstanceArrDel)
 
-	router.Post("/db/{instance}/set/hash", handlerInstanceSetHash)
-	router.Post("/db/{instance}/hash/key/set", handlerInstanceHashSet)
-	router.Get("/db/{instance}/hash/key/get", handlerInstanceHashGet)
-	router.Delete("/db/{instance}/hash/key/del", handlerInstanceHashDel)
+	router.Post("/inst/{instance}/set/hash", handlerInstanceSetHash)
+	router.Post("/inst/{instance}/hash/key/set", handlerInstanceHashSet)
+	router.Get("/inst/{instance}/hash/key/get", handlerInstanceHashGet)
+	router.Delete("/inst/{instance}/hash/key/del", handlerInstanceHashDel)
 
-	router.Post("/db/{instance}/ttl/set", handlerInstanceTTLSet)
-	router.Delete("/db/{instance}/ttl/del", handlerInstanceTTLDel)
+	router.Post("/inst/{instance}/ttl/set", handlerInstanceTTLSet)
+	router.Delete("/inst/{instance}/ttl/del", handlerInstanceTTLDel)
 
-	router.Post("/db/{instance}/set", handlerInstanceSetString)
-	router.Get("/db/{instance}/get/{name}", handlerInstanceGet)
-	router.Delete("/db/{instance}/delete/{name}", handlerInstanceDel)
+	router.Post("/inst/{instance}/set", handlerInstanceSetString)
+	router.Get("/inst/{instance}/get/{name}", handlerInstanceGet)
+	router.Delete("/inst/{instance}/delete/{name}", handlerInstanceDel)
 
-	router.Get("/db/{instance}", handlerInstanceInfo)
+	router.Get("/inst/{instance}", handlerInstanceInfo)
 
 	router.Get("/", handlerNotFount)
 	http.Handle("/", router)

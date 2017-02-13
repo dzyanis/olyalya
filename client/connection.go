@@ -5,7 +5,6 @@ import (
 	"net"
 	"net/http"
 	"bytes"
-	"bufio"
 	"time"
 	"encoding/json"
 )

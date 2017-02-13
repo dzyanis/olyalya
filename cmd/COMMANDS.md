@@ -1,45 +1,87 @@
 #Client commands
 ## Common
-###ECHO
 Example:
-```ECHO "Hello world"```
+```
+ECHO "Hello world"
+```
 
-## Data Bases
-```HELP cmd```
+```
+HELP cmd
+```
 
-```DB/LIST```
+```
+EXIT
+```
 
-```DB/CREATE name```
+## Instances
+```
+INST/LIST
+```
 
-```DB/SELECT name```
+```
+INST/CREATE name
+```
 
-```DB/DEL name```
+```
+INST/SELECT name
+```
+
+
+```
+INST/DESTROY name
+```
 
 ## Main command
-```GET name```
+```
+GET name
+```
 
-```DEL name```
+```
+DEL name
+```
 
-```SET name "value"```
+```
+SET name "value"
+```
 
-```TTL name seconds```
+```
+TTL name seconds
+```
 
-```HAS name```
+```
+HAS name
+```
 
 ## Array
-```ARR/SET name ["a", "b", "c"] ttl```
+```
+ARR/SET name ["a", "b", "c"] ttl
+```
 
-```ARR/INDEX/GET name index```
+```
+ARR/INDEX/GET name index
+```
 
-```ARR/INDEX/SET name index value```
+```
+ARR/INDEX/SET name index value
+```
 
-```ARR/INDEX/DEL name index```
+```
+ARR/INDEX/DEL name index
+```
 
 ## Hash
-```HASH/SET name {"key": "value"} ttl```
+```
+HASH/SET name {"key": "value"} ttl
+```
 
-```HASH/KEY/GET name key```
+```
+HASH/KEY/GET name key
+```
 
-```HASH/KEY/SET name key value```
+```
+HASH/KEY/SET name key value
+```
 
-```HASH/KEY/DEL name key```
+```
+HASH/KEY/DEL name key
+```

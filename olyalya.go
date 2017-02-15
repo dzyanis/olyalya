@@ -6,6 +6,7 @@ import (
 	"os"
 	"errors"
 	"strings"
+	"strconv"
 	"github.com/dzyanis/olyalya/cmd"
 	"github.com/dzyanis/olyalya/client"
 )
@@ -14,6 +15,37 @@ var (
 	Client *client.Client
 	Cmd = cmd.NewCmd()
 )
+
+func handlerSetTTL(c *cmd.Cmd, args []string, line string) (string, error) {
+	if len(args) < 3 {
+		return "", errors.New("Not enough arguments")
+	}
+
+	ttl, err := strconv.Atoi(args[2]);
+	if err!=nil {
+		return "", err
+	}
+
+	err = Client.SetTTL(args[1], ttl)
+	if err!=nil {
+		return "", err
+	}
+
+	return "OK", nil
+}
+
+func handlerDeleteTTL(c *cmd.Cmd, args []string, line string) (string, error) {
+	if len(args) < 2 {
+		return "", errors.New("Not enough arguments")
+	}
+
+	err := Client.DelTTL(args[1])
+	if err!=nil {
+		return "", err
+	}
+
+	return "OK", nil
+}
 
 func init() {
 	Client = client.NewClient("localhost", 8080)
@@ -110,22 +142,54 @@ func init() {
 		},
 	})
 
-
 	Cmd.Add("SET", &cmd.Command{
 		Title: "Set value",
-		Description: "Example: SET [1, 2, 3, 4, 5]",
+		Description: "Example: SET name \"value\" ttl",
 		Handler: func(c *cmd.Cmd, args []string, line string) (string, error) {
 			if len(args) < 3 {
 				return "", errors.New("Not enough arguments")
 			}
 
-			err := Client.Set(args[1], args[2])
+			ttl := 0
+			if len(args) > 3 {
+				ttl, _ = strconv.Atoi(args[3]);
+			}
+
+			err := Client.Set(args[1], args[2], ttl)
 			if err!=nil {
 				return "", err
 			}
 
 			return "OK", nil
 		},
+	})
+	Cmd.Add("GET", &cmd.Command{
+		Title: "Get value",
+		Description: "Example: GET name",
+		Handler: func(c *cmd.Cmd, args []string, line string) (string, error) {
+			if len(args) < 2 {
+				return "", errors.New("Not enough arguments")
+			}
+
+			value, err := Client.Get(args[1])
+			if err!=nil {
+				return "", err
+			}
+
+			return value, nil
+		},
+	})
+
+	Cmd.Add("TTL/SET", &cmd.Command{
+		Title: "Set time to live",
+		Description: "Example: TTL/SET mayfly 86400",
+		Handler: handlerSetTTL,
+	})
+
+	Cmd.Add("TTL/DEL", &cmd.Command{
+		Title: "Remove time to live",
+		Description: "Example: TTL/DEL mayfly",
+		Handler: handlerDeleteTTL,
 	})
 }
 

@@ -18,6 +18,7 @@ type Instance struct {
 
 var (
 	ErrInstanceUnknownType = errors.New("Unknown type")
+	ErrInstanceVariableNotExist = errors.New("Variable is not exist")
 	ErrInstanceNotExist = errors.New("Item Not exist")
 	//ErrInstanceConvertToInt = errors.New("Convert to int")
 	ErrInstanceValueWasExpired = errors.New("Value was expired")
@@ -63,6 +64,11 @@ func (o *Instance) SetTTL(name string, ttl uint) error {
 	o.Lock()
 	defer o.Unlock()
 
+	_, ok := o.base[name]
+	if !ok {
+		return ErrInstanceVariableNotExist
+	}
+
 	o.setTTL(name, ttl)
 	return nil
 }
@@ -86,7 +92,7 @@ func (o *Instance) Get(name string) (interface{}, error) {
 	defer o.RUnlock()
 	r, ok := o.base[name]
 	if !ok {
-		return nil, ErrInstanceHashKeyIsNotExist
+		return nil, ErrInstanceVariableNotExist
 	}
 	if o.checkExpired(name) {
 		return nil, ErrInstanceValueWasExpired

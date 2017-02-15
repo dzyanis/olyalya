@@ -41,15 +41,16 @@ DEL name
 ```
 
 ```
-SET name "value"
+SET name "value" ttl
+```
+
+## Time to Live
+```
+TTL/SET name seconds
 ```
 
 ```
-TTL name seconds
-```
-
-```
-HAS name
+TTL/DEL name
 ```
 
 ## Array

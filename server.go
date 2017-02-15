@@ -113,7 +113,11 @@ func handlerInstanceTTLSet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	instance.SetTTL(res.Name, res.Expire);
+	err = instance.SetTTL(res.Name, res.Expire);
+	if  err != nil {
+		handlerJsonError(w, err)
+		return
+	}
 
 	handlerJsonOk(w)
 }
@@ -380,7 +384,10 @@ func handlerDatabaseCreate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	db.Create(data["name"])
+	err = db.Create(data["name"])
+	if err!=nil {
+		handlerJsonError(w, err)
+	}
 	handlerJsonOk(w);
 }
 
@@ -490,7 +497,11 @@ func handlerInstanceSetString(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if res.Expire>0 {
-		instance.SetTTL(res.Name, res.Expire);
+		err = instance.SetTTL(res.Name, res.Expire);
+		if  err != nil {
+			handlerJsonError(w, err)
+			return
+		}
 	}
 
 	handlerJsonOk(w)
@@ -525,7 +536,11 @@ func handlerInstanceSetArray(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if res.Expire>0 {
-		instance.SetTTL(res.Name, res.Expire);
+		err = instance.SetTTL(res.Name, res.Expire);
+		if  err != nil {
+			handlerJsonError(w, err)
+			return
+		}
 	}
 
 	handlerJsonOk(w)
@@ -560,7 +575,11 @@ func handlerInstanceSetHash(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if res.Expire>0 {
-		instance.SetTTL(res.Name, res.Expire);
+		err = instance.SetTTL(res.Name, res.Expire);
+		if  err != nil {
+			handlerJsonError(w, err)
+			return
+		}
 	}
 
 	handlerJsonOk(w)

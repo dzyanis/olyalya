@@ -12,6 +12,7 @@ type DataBase struct {
 
 var (
 	ErrDatabaseInstanceNotExist = errors.New("Instance Not Exist")
+	ErrDatabaseInstanceAlreadyExist = errors.New("Instance Already Exist")
 )
 
 func NewDatabase() *DataBase {
@@ -20,10 +21,12 @@ func NewDatabase() *DataBase {
 	}
 }
 
-func (db *DataBase) Create(name string) {
+func (db *DataBase) Create(name string) error {
 	if !db.Has(name) {
 		db.instances[name] = NewInstance()
+		return nil
 	}
+	return ErrDatabaseInstanceAlreadyExist
 }
 
 func (db DataBase) Has(key string) bool {

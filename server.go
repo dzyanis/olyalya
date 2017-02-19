@@ -16,7 +16,7 @@ var (
 )
 
 var (
-	httpAddress = flag.String("http.addr", ":8080", "HTTP listen address")
+	httpAddress = flag.String("http.addr", ":5555", "HTTP listen address")
 )
 
 type RespondJson map[string]interface{}
@@ -61,28 +61,29 @@ type RequestJsonHashItem struct {
 func main() {
 	var router = pat.New();
 
-	router.Post("/inst/create", handlerDatabaseCreate)
-	router.Get("/inst/list", handlerDatabaseList)
+	router.Post("/create", handlerDatabaseCreate)
+	router.Get("/list", handlerDatabaseList)
+	router.Delete("/destroy", handlerInstanceDestroy)
 
-	router.Post("/inst/{instance}/set/arr", handlerInstanceSetArray)
-	router.Post("/inst/{instance}/arr/index/add", handlerInstanceArrAdd)
-	router.Post("/inst/{instance}/arr/index/set", handlerInstanceArrSet)
-	router.Get("/inst/{instance}/arr/index/get", handlerInstanceArrGet)
-	router.Delete("/inst/{instance}/arr/index/del", handlerInstanceArrDel)
+	router.Post("/in/{instance}/arr/set", handlerInstanceSetArray)
+	router.Post("/in/{instance}/arr/el/add", handlerInstanceArrAdd)
+	router.Post("/in/{instance}/arr/el/set", handlerInstanceArrSet)
+	router.Get("/in/{instance}/arr/el/get", handlerInstanceArrGet)
+	router.Delete("/in/{instance}/arr/el/del", handlerInstanceArrDel)
 
-	router.Post("/inst/{instance}/set/hash", handlerInstanceSetHash)
-	router.Post("/inst/{instance}/hash/key/set", handlerInstanceHashSet)
-	router.Get("/inst/{instance}/hash/key/get", handlerInstanceHashGet)
-	router.Delete("/inst/{instance}/hash/key/del", handlerInstanceHashDel)
+	router.Post("/in/{instance}/hash/set", handlerInstanceSetHash)
+	router.Post("/in/{instance}/hash/el/set", handlerInstanceHashSet)
+	router.Get("/in/{instance}/hash/el/get", handlerInstanceHashGet)
+	router.Delete("/in/{instance}/hash/el/del", handlerInstanceHashDel)
 
-	router.Post("/inst/{instance}/ttl/set", handlerInstanceTTLSet)
-	router.Delete("/inst/{instance}/ttl/del", handlerInstanceTTLDel)
+	router.Post("/in/{instance}/ttl/set", handlerInstanceTTLSet)
+	router.Delete("/in/{instance}/ttl/del", handlerInstanceTTLDel)
 
-	router.Post("/inst/{instance}/set", handlerInstanceSetString)
-	router.Get("/inst/{instance}/get/{name}", handlerInstanceGet)
-	router.Delete("/inst/{instance}/delete/{name}", handlerInstanceDel)
+	router.Post("/in/{instance}/set", handlerInstanceSetString)
+	router.Get("/in/{instance}/get/{name}", handlerInstanceGet)
+	router.Delete("/in/{instance}/delete/{name}", handlerInstanceDel)
 
-	router.Get("/inst/{instance}", handlerInstanceInfo)
+	router.Get("/in/{instance}", handlerInstanceInfo)
 
 	router.Get("/", handlerNotFount)
 	http.Handle("/", router)
@@ -385,8 +386,9 @@ func handlerDatabaseCreate(w http.ResponseWriter, r *http.Request) {
 	}
 
 	err = db.Create(data["name"])
-	if err!=nil {
+	if err != nil {
 		handlerJsonError(w, err)
+		return
 	}
 	handlerJsonOk(w);
 }
@@ -399,8 +401,22 @@ func handlerDatabaseList(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+func handlerInstanceDestroy(w http.ResponseWriter, r *http.Request) {
+	data := map[string]string{}
+	err := json.NewDecoder(r.Body).Decode(&data)
+	defer r.Body.Close()
+
+	if err != nil {
+		handlerJsonError(w, err)
+		return
+	}
+
+	db.Delete(data["name"])
+	handlerJsonOk(w);
+}
+
 func handlerJson(w http.ResponseWriter, code int, object interface{}) {
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/vnd.api+json")
 	w.WriteHeader(code)
 	json.NewEncoder(w).Encode(object)
 }
@@ -429,8 +445,8 @@ func handlerInstanceInfo(w http.ResponseWriter, r *http.Request) {
 
 	handlerJson(w, http.StatusOK, &RespondJson{
 		"instance": instanceName,
-		"len": instance.Len(),
-		"keys": instance.Keys(),
+		"length": instance.Len(),
+		"names": instance.Keys(),
 	})
 }
 

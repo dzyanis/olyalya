@@ -10,25 +10,29 @@ HELP cmd
 ```
 
 ```
+HELP cmd
+```
+
+```
 EXIT
 ```
 
 ## Instances
 ```
-INST/LIST
+LIST
 ```
 
 ```
-INST/CREATE name
+CREATE name
 ```
 
 ```
-INST/SELECT name
+SELECT name
 ```
 
 
 ```
-INST/DESTROY name
+DESTROY name
 ```
 
 ## Main command
@@ -55,34 +59,46 @@ TTL/DEL name
 
 ## Array
 ```
+ARR/GET name
+```
+
+```
 ARR/SET name ["a", "b", "c"] ttl
 ```
 
 ```
-ARR/INDEX/GET name index
+ARR/EL/ADD name value
 ```
 
 ```
-ARR/INDEX/SET name index value
+ARR/EL/GET name index
 ```
 
 ```
-ARR/INDEX/DEL name index
+ARR/EL/SET name index value
+```
+
+```
+ARR/EL/DEL name index
 ```
 
 ## Hash
+```
+HASH/GET name
+```
+
 ```
 HASH/SET name {"key": "value"} ttl
 ```
 
 ```
-HASH/KEY/GET name key
+HASH/EL/GET name key
 ```
 
 ```
-HASH/KEY/SET name key value
+HASH/EL/SET name key value
 ```
 
 ```
-HASH/KEY/DEL name key
+HASH/EL/DEL name key
 ```

@@ -11,8 +11,8 @@ type DataBase struct {
 }
 
 var (
-	ErrDatabaseInstanceNotExist = errors.New("Instance Not Exist")
-	ErrDatabaseInstanceAlreadyExist = errors.New("Instance Already Exist")
+	ErrDatabaseInstanceNotExist = errors.New("Instance not exist")
+	ErrDatabaseInstanceAlreadyExist = errors.New("Instance already exist")
 )
 
 func NewDatabase() *DataBase {
@@ -34,8 +34,8 @@ func (db DataBase) Has(key string) bool {
 	return ok
 }
 
-func (db DataBase) Delete(key string) {
-	delete(db.instances, key)
+func (db DataBase) Delete(name string) {
+	delete(db.instances, name)
 }
 
 func (db DataBase) Get(key string) (*Instance, error) {

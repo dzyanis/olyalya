@@ -1,66 +1,7 @@
--- SHOW HELP INFORMATION
-HELP
-
--- CREATE NEW INSTANCE
-INST/CREATE dz
-
--- SELECT NEW INSTANCE
-INST/SELECT dz
-
--- SET STRING
+CREATE dz
+SELECT dz
 SET one "1"
 GET one
 
--- SET ARRAY
-SET numbers ["zero", "one", "two"]
-GET numbers
-ARR/INDEX/GET numbers 2
-ARR/INDEX/ADD numbers "three"
-ARR/INDEX/GET numbers 3
-ARR/INDEX/DEL numbers 0
-ARR/INDEX/GET numbers 0
-
--- SET HASH
-SET author {"name": "Dzyanis", "year": "1987"}
-GET author
-HASH/KEY/SET author profession "Back-end Developer"
-HASH/KEY/GET author profession
-HASH/KEY/DEL author year
-GET author
-
--- DELETE STRING
-DEL one
-GET one
-
--- DELETE ARRAY
-DEL numbers
-GET numbers
-
--- DELETE HASH
-DEL author
-GET author
-
--- TTL
-SET {"name": "one", "value": "1", "ttl": 2}
-GET one
-ECHO '... pause 2 sec'
-SLEEP 2
-GET one
-
--- TTL SET
-SET {"name": "one", "value": "1"}
-GET one
-TTL/SET one 2
-GET one
-ECHO "... pause 2 sec"
-SLEEP 2
-GET one
-
--- TTL DEL
-SET one "1" 3
-GET one
-TTL/DEL one
-GET one
-ECHO "... pause 2 sec"
-SLEEP 3
-GET one
+ARR/SET numbers ["zero", "one", "two"]
+ARR/GET numbers

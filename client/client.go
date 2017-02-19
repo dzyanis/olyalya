@@ -15,6 +15,8 @@ type Json struct {
 
 	Count int 	`json:"count"`
 	Names []string	`json:"names"`
+
+	Length int 	`json:"length"`
 }
 
 func JsonReader(body *io.ReadCloser) (Json, error) {
@@ -27,13 +29,46 @@ func JsonReader(body *io.ReadCloser) (Json, error) {
 	return j, nil
 }
 
+
+type JsonArr struct {
+	Status string	`json:"status"`
+	Error string	`json:"error"`
+	Value []string	`json:"value"`
+}
+
+func JsonArrayReader(body *io.ReadCloser) (JsonArr, error) {
+	var ja JsonArr
+	decoder := json.NewDecoder(*body)
+	err := decoder.Decode(&ja)
+	if err != nil {
+		return ja, err
+	}
+	return ja, nil
+}
+
+type JsonHash struct {
+	Status string		`json:"status"`
+	Error string		`json:"error"`
+	Value map[string]string `json:"value"`
+}
+
+func JsonHashReader(body *io.ReadCloser) (JsonHash, error) {
+	var jh JsonHash
+	decoder := json.NewDecoder(*body)
+	err := decoder.Decode(&jh)
+	if err != nil {
+		return jh, err
+	}
+	return jh, nil
+}
+
 type Client struct {
 	conn *Connection
 	instName string
 }
 
 var (
-	ErrClientDbWasNotSelected = errors.New("DataBase wasn't selected")
+	ErrInstanceNotSelected = errors.New("Instance wasn't selected")
 )
 
 func NewClient(addr string, port int) *Client {
@@ -42,29 +77,39 @@ func NewClient(addr string, port int) *Client {
 	}
 }
 
-func (c *Client) InstCreate(instName string) error {
-	req, err := c.conn.Post("/inst/create", map[string]interface{}{
-		"name": instName,
-	})
+func (c *Client) simpleRequest(method string, path string, data map[string]interface{}) (string, error) {
+	req, err := c.conn.request(method, c.conn.Url(path), data)
 	if err != nil {
-		return err
+		return "", err
 	}
 	defer req.Body.Close()
 
 	j, err := JsonReader(&req.Body)
 	if err != nil {
-		return err
+		return "", err
 	}
 
-	if j.Error!="" {
-		return errors.New(j.Error)
+	if j.Error != "" {
+		return "", errors.New(j.Error)
+	}
+
+	return j.Value, err
+}
+
+func (c *Client) CreateInstance(instName string) error {
+	_, err := c.simpleRequest("POST", "/create", map[string]interface{}{
+		"name": instName,
+	})
+
+	if err != nil {
+		return err
 	}
 
 	return nil
 }
 
-func (c *Client) InstList() ([]string, error) {
-	req, err := c.conn.Get("/inst/list", map[string]interface{}{})
+func (c *Client) ListInstances() ([]string, error) {
+	req, err := c.conn.Get("/list", map[string]interface{}{})
 	if err != nil {
 		return []string{}, err
 	}
@@ -78,8 +123,8 @@ func (c *Client) InstList() ([]string, error) {
 	return j.Names, nil
 }
 
-func (c *Client) InstSelect(instName string) error {
-	req, err := c.conn.Get(fmt.Sprintf("/inst/%s", instName), map[string]interface{}{})
+func (c *Client) SelectInstance(instName string) error {
+	req, err := c.conn.Get(fmt.Sprintf("/in/%s", instName), map[string]interface{}{})
 	if err != nil {
 		return err
 	}
@@ -98,17 +143,42 @@ func (c *Client) InstSelect(instName string) error {
 	return nil
 }
 
-func (c *Client) InstName() string {
+func (c *Client) checkContext() error {
+	if c.instName == "" {
+		return ErrInstanceNotSelected
+	}
+	return nil
+}
+
+func (c *Client) CurrentInstanceName() string {
 	return c.instName
 }
 
-// curl -X POST -H 'Content-Type: application/json' 'http://localhost:8080/inst/dz/set' -d '{"name": "one", "value": "1"}'
 func (c *Client) Set(name string, value string, ttl int) error {
-	if c.instName == "" {
-		return ErrClientDbWasNotSelected
+	if err := c.checkContext(); err != nil {
+		return err
 	}
 
-	req, err := c.conn.Post(fmt.Sprintf("/inst/%s/set", c.instName), map[string]interface{}{
+	path := fmt.Sprintf("/in/%s/set", c.instName)
+	_, err := c.simpleRequest("POST", path, map[string]interface{}{
+		"name":  name,
+		"value": value,
+		"ttl":   ttl,
+	})
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (c *Client) SetArray(name string, value []string, ttl int) error {
+	if err := c.checkContext(); err != nil {
+		return err
+	}
+
+	req, err := c.conn.Post(fmt.Sprintf("/in/%s/arr/set", c.instName), map[string]interface{}{
 		"name": name,
 		"value": value,
 		"ttl": ttl,
@@ -130,15 +200,62 @@ func (c *Client) Set(name string, value string, ttl int) error {
 	return nil
 }
 
-
-// curl -X POST -H 'Content-Type: application/json' 'http://localhost:8080/inst/dz/ttl/set' -d '{"name": "one", "ttl": 2}'
-func (c *Client) SetTTL(name string, ttl int) error {
-	if c.instName == "" {
-		return ErrClientDbWasNotSelected
+func (c *Client) GetArray(name string) ([]string, error) {
+	empty := []string{}
+	if err := c.checkContext(); err != nil {
+		return empty, err
 	}
 
-	req, err := c.conn.Post(fmt.Sprintf("/inst/%s/ttl/set", c.instName), map[string]interface{}{
+	req, err := c.conn.Get(fmt.Sprintf("/in/%s/get/%s", c.instName, name), map[string]interface{}{})
+	if err != nil {
+		return empty, err
+	}
+	defer req.Body.Close()
+
+	j, err := JsonArrayReader(&req.Body)
+	if err != nil {
+		return empty, err
+	}
+
+	if j.Error != "" {
+		return empty, errors.New(j.Error)
+	}
+
+	return j.Value, nil
+}
+
+func (c *Client) GetHash(name string) (map[string]string, error) {
+	empty := map[string]string{}
+	if err := c.checkContext(); err != nil {
+		return empty, err
+	}
+
+	req, err := c.conn.Get(fmt.Sprintf("/in/%s/get/%s", c.instName, name), map[string]interface{}{})
+	if err != nil {
+		return empty, err
+	}
+	defer req.Body.Close()
+
+	j, err := JsonHashReader(&req.Body)
+	if err != nil {
+		return empty, err
+	}
+
+	if j.Error != "" {
+		return empty, errors.New(j.Error)
+	}
+
+	return j.Value, nil
+}
+
+func (c *Client) SetHash(name string, value map[string]string, ttl int) error {
+	if err := c.checkContext(); err != nil {
+		return err
+	}
+
+	req, err := c.conn.Post(fmt.Sprintf("/in/%s/hash/set", c.instName), map[string]interface{}{
 		"name": name,
+		"value": value,
 		"ttl": ttl,
 	})
 	if err != nil {
@@ -158,13 +275,30 @@ func (c *Client) SetTTL(name string, ttl int) error {
 	return nil
 }
 
-// curl -X DELETE -H 'Content-Type: application/json' 'http://localhost:8080/inst/dz/ttl/del' -d '{"name": "one"}'
-func (c *Client) DelTTL(name string) error {
-	if c.instName == "" {
-		return ErrClientDbWasNotSelected
+func (c *Client) SetTTL(name string, ttl int) error {
+	if err := c.checkContext(); err != nil {
+		return err
 	}
 
-	req, err := c.conn.Delete(fmt.Sprintf("/inst/%s/ttl/del", c.instName), map[string]interface{}{
+	path := fmt.Sprintf("/in/%s/ttl/set", c.instName)
+	_, err := c.simpleRequest("POST", path, map[string]interface{}{"instance": c.instName,
+		"name": name,
+		"ttl": ttl,
+	})
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (c *Client) DelTTL(name string) error {
+	if err := c.checkContext(); err != nil {
+		return err
+	}
+
+	req, err := c.conn.Delete(fmt.Sprintf("/in/%s/ttl/del", c.instName), map[string]interface{}{
 		"name": name,
 	})
 	if err != nil {
@@ -184,13 +318,12 @@ func (c *Client) DelTTL(name string) error {
 	return nil
 }
 
-// curl -X GET 'http://localhost:8080/inst/dz/get/one'
 func (c *Client) Get(name string) (string, error) {
-	if c.instName == "" {
-		return "", ErrClientDbWasNotSelected
+	if err := c.checkContext(); err != nil {
+		return "", err
 	}
 
-	req, err := c.conn.Get(fmt.Sprintf("/inst/%s/get/%s", c.instName, name), map[string]interface{}{})
+	req, err := c.conn.Get(fmt.Sprintf("/in/%s/get/%s", c.instName, name), map[string]interface{}{})
 	if err != nil {
 		return "", err
 	}
@@ -206,4 +339,197 @@ func (c *Client) Get(name string) (string, error) {
 	}
 
 	return j.Value, nil
+}
+
+func (c *Client) Del(name string) error {
+	if err := c.checkContext(); err != nil {
+		return err
+	}
+
+	err := c.checkContext()
+	if err != nil {
+		return err
+	}
+
+	path := fmt.Sprintf("/in/%s/delete/%s", c.instName, name)
+	_, err = c.simpleRequest("DELETE", path, map[string]interface{}{})
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (c *Client) GetArrayElement(name string, index int) (string, error) {
+	if err := c.checkContext(); err != nil {
+		return "", err
+	}
+
+	req, err := c.conn.Get(fmt.Sprintf("/in/%s/arr/el/get", c.instName), map[string]interface{}{
+		"name": name,
+		"index": index,
+	})
+	if err != nil {
+		return "", err
+	}
+	defer req.Body.Close()
+
+	j, err := JsonReader(&req.Body)
+	if err != nil {
+		return "", err
+	}
+
+	if j.Error != "" {
+		return "", errors.New(j.Error)
+	}
+
+	return j.Value, nil
+}
+
+func (c *Client) SetArrayElement(name string, index int, value string) error {
+	if err := c.checkContext(); err != nil {
+		return err
+	}
+
+	path := fmt.Sprintf("/in/%s/arr/el/set", c.instName)
+	_, err := c.simpleRequest("GET", path, map[string]interface{}{
+		"name":  name,
+		"index": index,
+		"value": value,
+	})
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (c *Client) DelArrayElement(name string, index int) error {
+	if err := c.checkContext(); err != nil {
+		return err
+	}
+
+	path := fmt.Sprintf("/in/%s/arr/el/del", c.instName)
+	_, err := c.simpleRequest("DELETE", path, map[string]interface{}{
+		"name": name,
+		"index": index,
+	})
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (c *Client) AddArrayElement(name string, value string) error {
+	if err := c.checkContext(); err != nil {
+		return err
+	}
+
+	path := fmt.Sprintf("/in/%s/arr/el/add", c.instName)
+	_, err := c.simpleRequest("POST", path, map[string]interface{}{
+		"name":  name,
+		"value": value,
+	})
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (c *Client) SetHashElement(name string, key string, value string) error {
+	if err := c.checkContext(); err != nil {
+		return err
+	}
+
+	path := fmt.Sprintf("/in/%s/hash/el/set", c.instName)
+	_, err := c.simpleRequest("POST", path, map[string]interface{}{
+		"name":  name,
+		"key":   key,
+		"value": value,
+	})
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (c *Client) GetHashElement(name string, key string) (string, error) {
+	if err := c.checkContext(); err != nil {
+		return "", err
+	}
+
+	path := fmt.Sprintf("/in/%s/hash/el/get", c.instName)
+	res, err := c.simpleRequest("GET", path, map[string]interface{}{
+		"name":  name,
+		"key":   key,
+	})
+
+	if err != nil {
+		return "", err
+	}
+
+	return res, nil
+}
+
+func (c *Client) DelHashElement(name string, key string) error {
+	if err := c.checkContext(); err != nil {
+		return err
+	}
+
+	path := fmt.Sprintf("/in/%s/hash/el/del", c.instName)
+	_, err := c.simpleRequest("DELETE", path, map[string]interface{}{
+		"name":  name,
+		"key":   key,
+	})
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (c *Client) Keys() ([]string, error) {
+	empty := []string{}
+
+	if err := c.checkContext(); err != nil {
+		return empty, err
+	}
+
+	req, err := c.conn.Get(fmt.Sprintf("/in/%s", c.instName), map[string]interface{}{})
+	if err != nil {
+		return empty, err
+	}
+	defer req.Body.Close()
+
+	j, err := JsonReader(&req.Body)
+	if err != nil {
+		return empty, err
+	}
+
+	if j.Error != "" {
+		return empty, errors.New(j.Error)
+	}
+
+	return j.Names, err
+}
+
+func (c *Client) Destroy(name string) error {
+	if c.CurrentInstanceName() == name {
+		_ = c.SelectInstance("")
+	}
+
+	_, err := c.simpleRequest("DELETE", "/destroy", map[string]interface{}{
+		"name":  name,
+	})
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

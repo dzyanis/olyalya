@@ -219,7 +219,7 @@ Example:
 {"status":"OK"}
 ```
 
-###HASH/EL/GET
+###Get an element of a hash
 ####Request
 - Path: /in/:intrance_name/hash/el/get
 - Method: GET
@@ -238,7 +238,7 @@ Example:
 }
 ```
 
-###HASH/EL/SET
+###Set/Update an element of a hash
 ####Request
 - Path: /in/:intrance_name/hash/el/set
 - Method: POST

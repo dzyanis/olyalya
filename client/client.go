@@ -1,3 +1,4 @@
+// The library works with O(lya-lya) DataBase throw the HTTP protocol
 package client
 
 import (
@@ -7,6 +8,7 @@ import (
 	"io"
 )
 
+// Basic JSON answer
 type Json struct {
 	Status string	`json:"status"`
 	Error string	`json:"error"`
@@ -96,6 +98,7 @@ func (c *Client) simpleRequest(method string, path string, data map[string]inter
 	return j.Value, err
 }
 
+// Create a new instance
 func (c *Client) CreateInstance(instName string) error {
 	_, err := c.simpleRequest("POST", "/create", map[string]interface{}{
 		"name": instName,
@@ -108,6 +111,7 @@ func (c *Client) CreateInstance(instName string) error {
 	return nil
 }
 
+// Returns list of all instances
 func (c *Client) ListInstances() ([]string, error) {
 	req, err := c.conn.Get("/list", map[string]interface{}{})
 	if err != nil {
@@ -123,6 +127,7 @@ func (c *Client) ListInstances() ([]string, error) {
 	return j.Names, nil
 }
 
+// Set context
 func (c *Client) SelectInstance(instName string) error {
 	req, err := c.conn.Get(fmt.Sprintf("/in/%s", instName), map[string]interface{}{})
 	if err != nil {

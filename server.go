@@ -1,3 +1,4 @@
+// This O(lya-lya) DataBase
 package main
 
 import (
@@ -13,6 +14,7 @@ import (
 var (
 	db = server.NewDatabase()
 	Version = "0.0.0"
+	ServerName = "OLL"
 )
 
 var (
@@ -58,6 +60,12 @@ type RequestJsonHashItem struct {
 	Key string		`json:"key"`
 }
 
+type ApiHTTPRoute struct {
+	Method string
+	Path string
+	Handler http.HandlerFunc
+}
+
 func main() {
 	var router = pat.New();
 
@@ -88,7 +96,7 @@ func main() {
 	router.Get("/", handlerNotFount)
 	http.Handle("/", router)
 
-	log.Printf("Version %s listening on %s", Version, *httpAddress)
+	log.Printf("Server %s %s listening on %s", ServerName, Version, *httpAddress)
 	log.Fatal(http.ListenAndServe(*httpAddress, nil))
 }
 
@@ -417,6 +425,7 @@ func handlerInstanceDestroy(w http.ResponseWriter, r *http.Request) {
 
 func handlerJson(w http.ResponseWriter, code int, object interface{}) {
 	w.Header().Set("Content-Type", "application/vnd.api+json")
+	w.Header().Set("Server", "OLL 0.0.1")
 	w.WriteHeader(code)
 	json.NewEncoder(w).Encode(object)
 }

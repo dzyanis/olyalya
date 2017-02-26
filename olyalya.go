@@ -1,3 +1,4 @@
+// Client for O(lya-lya) DataBase
 package main
 
 import (
@@ -13,13 +14,23 @@ import (
 )
 
 var (
+	ErrNotEnoughArguments = errors.New("Not enough arguments")
+	ErrCanNotExit = errors.New("Something really went wrong")
+)
+
+const HelpInformation = `Command is not exist.
+Run 'HELP' for usage.
+More information on https://github.com/dzyanis/olyalya
+`
+
+var (
 	Client *client.Client
 	Cmd = cmd.NewCmd()
 )
 
 func ValidCountArguments(args []string, min int) error {
 	if len(args) < min {
-		return errors.New("Not enough arguments")
+		return ErrNotEnoughArguments
 	}
 	return nil
 }
@@ -158,7 +169,7 @@ func handleEcho(c *cmd.Cmd, args []string, line string) (string, error) {
 func handleExit(c *cmd.Cmd, args []string, line string) (string, error) {
 	fmt.Println("Bye!")
 	os.Exit(0)
-	return "", errors.New("Something really went wrong")
+	return "", ErrCanNotExit
 }
 
 func handleInstanceCreate(c *cmd.Cmd, args []string, line string) (string, error) {
@@ -689,7 +700,11 @@ func main() {
 
 		result, err := Cmd.Run(cli)
 		if err != nil {
-			fmt.Printf("ERROR: %s\n", err.Error())
+			if cmd.ErrCommandNotExist == err  {
+				fmt.Printf(HelpInformation)
+			} else {
+				fmt.Printf("ERROR: %s\n", err.Error())
+			}
 			continue
 		}
 		fmt.Println(result)

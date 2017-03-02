@@ -7,12 +7,12 @@ import (
 	"log"
 	"io/ioutil"
 	"encoding/json"
-	"github.com/dzyanis/olyalya/server"
+	"github.com/dzyanis/olyalya/database"
 	"github.com/gorilla/pat"
 )
 
 var (
-	db = server.NewDatabase()
+	db = database.NewDatabase()
 	Version = "0.0.0"
 	ServerName = "OLL"
 )

@@ -1,4 +1,3 @@
-// Client for O(lya-lya) DataBase
 package main
 
 import (
@@ -19,8 +18,7 @@ var (
 )
 
 const HelpInformation = `Command is not exist.
-Run 'HELP' for usage.
-More information on https://github.com/dzyanis/olyalya
+Run 'HELP' for usage or read more on https://github.com/dzyanis/olyalya
 `
 
 var (

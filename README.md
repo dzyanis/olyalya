@@ -14,6 +14,7 @@ Install and launch database:
 ```bash
 go install github.com/dzyanis/olyalya/olldb
 $GOPATH/bin/olldb
+```
 
 Install and launch commandline client:
 ```bash

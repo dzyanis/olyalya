@@ -9,7 +9,7 @@ It includes three part:
 - [Commondline Client](oll-cli/COMMANDS.md)
 
 
-##How to run
+## How to run
 Install and launch database:
 ```bash
 go install github.com/dzyanis/olyalya/olldb

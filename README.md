@@ -14,6 +14,7 @@ Install and launch database:
 ```bash
 go install github.com/dzyanis/olyalya/olldb
 $GOPATH/bin/olldb
+```
 
 Install and launch commandline client:
 ```bash
@@ -23,6 +24,7 @@ $GOPATH/bin/oll-cli
 
 
 Backlog:
+- add config
 - persistence to disk/db
 - scaling(on server-side or on client-side, up to you)
 - auth

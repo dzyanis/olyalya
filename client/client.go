@@ -31,7 +31,7 @@ func JsonReader(body *io.ReadCloser) (Json, error) {
 	return j, nil
 }
 
-
+// JSON answer for an array
 type JsonArr struct {
 	Status string	`json:"status"`
 	Error string	`json:"error"`
@@ -48,6 +48,7 @@ func JsonArrayReader(body *io.ReadCloser) (JsonArr, error) {
 	return ja, nil
 }
 
+// JSON answer for a hash
 type JsonHash struct {
 	Status string		`json:"status"`
 	Error string		`json:"error"`
@@ -73,6 +74,7 @@ var (
 	ErrInstanceNotSelected = errors.New("Instance wasn't selected")
 )
 
+// Constructor
 func NewClient(addr string, port int) *Client {
 	return &Client{
 		conn: NewConnection(addr, port),
@@ -127,7 +129,7 @@ func (c *Client) ListInstances() ([]string, error) {
 	return j.Names, nil
 }
 
-// Set context
+// Select context of an instance
 func (c *Client) SelectInstance(instName string) error {
 	req, err := c.conn.Get(fmt.Sprintf("/in/%s", instName), map[string]interface{}{})
 	if err != nil {
@@ -159,6 +161,7 @@ func (c *Client) CurrentInstanceName() string {
 	return c.instName
 }
 
+// Save string
 func (c *Client) Set(name string, value string, ttl int) error {
 	if err := c.checkContext(); err != nil {
 		return err
@@ -178,6 +181,7 @@ func (c *Client) Set(name string, value string, ttl int) error {
 	return nil
 }
 
+// Save an array
 func (c *Client) SetArray(name string, value []string, ttl int) error {
 	if err := c.checkContext(); err != nil {
 		return err
@@ -205,6 +209,7 @@ func (c *Client) SetArray(name string, value []string, ttl int) error {
 	return nil
 }
 
+// Get an array
 func (c *Client) GetArray(name string) ([]string, error) {
 	empty := []string{}
 	if err := c.checkContext(); err != nil {
@@ -229,6 +234,7 @@ func (c *Client) GetArray(name string) ([]string, error) {
 	return j.Value, nil
 }
 
+// Return a hash
 func (c *Client) GetHash(name string) (map[string]string, error) {
 	empty := map[string]string{}
 	if err := c.checkContext(); err != nil {
@@ -253,6 +259,7 @@ func (c *Client) GetHash(name string) (map[string]string, error) {
 	return j.Value, nil
 }
 
+// Save a hash
 func (c *Client) SetHash(name string, value map[string]string, ttl int) error {
 	if err := c.checkContext(); err != nil {
 		return err
@@ -280,6 +287,7 @@ func (c *Client) SetHash(name string, value map[string]string, ttl int) error {
 	return nil
 }
 
+// Set time to live
 func (c *Client) SetTTL(name string, ttl int) error {
 	if err := c.checkContext(); err != nil {
 		return err
@@ -297,7 +305,7 @@ func (c *Client) SetTTL(name string, ttl int) error {
 
 	return nil
 }
-
+// Remove time to live for variable
 func (c *Client) DelTTL(name string) error {
 	if err := c.checkContext(); err != nil {
 		return err

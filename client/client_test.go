@@ -3,9 +3,20 @@ package client
 import (
 	"testing"
 	"reflect"
+	"flag"
 )
 
-var Cln = NewClient("localhost", 5555)
+var (
+	httpUrl  = flag.String("http.url", "localhost", "HTTP listen URL")
+	httpPort = flag.Int("http.port", 3000, "HTTP listen port")
+
+	Cln *Client
+)
+
+func init() {
+	flag.Parse()
+	Cln = NewClient(*httpUrl, *httpPort)
+}
 
 
 func TestCreate(t *testing.T) {

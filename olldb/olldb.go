@@ -2,72 +2,82 @@
 package main
 
 import (
-	"net/http"
 	"flag"
-	"log"
-	"io/ioutil"
-	"encoding/json"
 	"github.com/dzyanis/olyalya/database"
 	"github.com/gorilla/pat"
+	"log"
+	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
+	"io/ioutil"
+	"encoding/json"
 )
 
 var (
-	db = database.NewDatabase()
-	Version = "0.0.0"
+	Db         = database.NewDatabase()
+	Version    = "0.0.0"
 	ServerName = "OLL"
 )
 
 var (
-	httpAddress = flag.String("http.addr", ":5555", "HTTP listen address")
+	httpAddress = flag.String("http.addr", ":3000", "HTTP listen address")
 )
 
 type RespondJson map[string]interface{}
 
 type RequestJsonTTL struct {
-	Name string	`json:"name"`
-	Expire uint	`json:"ttl"`
+	Name   string `json:"name"`
+	Expire uint   `json:"ttl"`
 }
 
 type RequestJsonString struct {
-	Name string	`json:"name"`
-	Value string	`json:"value"`
-	Expire uint	`json:"ttl"`
+	Name   string `json:"name"`
+	Value  string `json:"value"`
+	Expire uint   `json:"ttl"`
 }
 
 type RequestJsonArray struct {
-	Name string	`json:"name"`
-	Value []string	`json:"value"`
-	Index int	`json:"index"`
-	Expire uint	`json:"ttl"`
+	Name   string   `json:"name"`
+	Value  []string `json:"value"`
+	Index  int      `json:"index"`
+	Expire uint     `json:"ttl"`
 }
 
 type RequestJsonArrayItem struct {
-	Name string	`json:"name"`
-	Value string	`json:"value"`
-	Index uint	`json:"index"`
+	Name  string `json:"name"`
+	Value string `json:"value"`
+	Index uint   `json:"index"`
 }
 
 type RequestJsonHash struct {
-	Name string		`json:"name"`
-	Value map[string]string	`json:"value"`
-	Key string		`json:"key"`
-	Expire uint		`json:"ttl"`
+	Name   string            `json:"name"`
+	Value  map[string]string `json:"value"`
+	Key    string            `json:"key"`
+	Expire uint              `json:"ttl"`
 }
 
 type RequestJsonHashItem struct {
-	Name string		`json:"name"`
-	Value string		`json:"value"`
-	Key string		`json:"key"`
+	Name  string `json:"name"`
+	Value string `json:"value"`
+	Key   string `json:"key"`
 }
 
 type ApiHTTPRoute struct {
-	Method string
-	Path string
+	Method  string
+	Path    string
 	Handler http.HandlerFunc
 }
 
+func init() {
+	flag.Parse()
+}
+
 func main() {
-	var router = pat.New();
+	sigs := make(chan os.Signal, 1)
+	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
+
+	router := pat.New()
 
 	router.Post("/create", handlerDatabaseCreate)
 	router.Get("/list", handlerDatabaseList)
@@ -96,7 +106,14 @@ func main() {
 	router.Get("/", handlerNotFount)
 	http.Handle("/", router)
 
+	go func() {
+		_ = <-sigs
+		log.Printf("Server stops")
+		os.Exit(0)
+	}()
+
 	log.Printf("Server %s %s listening on %s", ServerName, Version, *httpAddress)
+
 	log.Fatal(http.ListenAndServe(*httpAddress, nil))
 }
 
@@ -116,7 +133,7 @@ func handlerInstanceTTLSet(w http.ResponseWriter, r *http.Request) {
 	}
 
 	instanceName := r.URL.Query().Get(":instance")
-	instance, err := db.Get(instanceName)
+	instance, err := Db.Get(instanceName)
 	if  err != nil {
 		handlerJsonError(w, err)
 		return
@@ -147,7 +164,7 @@ func handlerInstanceTTLDel(w http.ResponseWriter, r *http.Request) {
 	}
 
 	instanceName := r.URL.Query().Get(":instance")
-	instance, err := db.Get(instanceName)
+	instance, err := Db.Get(instanceName)
 	if  err != nil {
 		handlerJsonError(w, err)
 		return
@@ -181,7 +198,7 @@ func handlerInstanceArrAdd(w http.ResponseWriter, r *http.Request) {
 	}
 
 	instanceName := r.URL.Query().Get(":instance")
-	instance, err := db.Get(instanceName)
+	instance, err := Db.Get(instanceName)
 	if  err != nil {
 		handlerJsonError(w, err)
 		return
@@ -212,7 +229,7 @@ func handlerInstanceArrGet(w http.ResponseWriter, r *http.Request) {
 	}
 
 	instanceName := r.URL.Query().Get(":instance")
-	instance, err := db.Get(instanceName)
+	instance, err := Db.Get(instanceName)
 	if  err != nil {
 		handlerJsonError(w, err)
 		return
@@ -246,7 +263,7 @@ func handlerInstanceArrDel(w http.ResponseWriter, r *http.Request) {
 	}
 
 	instanceName := r.URL.Query().Get(":instance")
-	instance, err := db.Get(instanceName)
+	instance, err := Db.Get(instanceName)
 	if  err != nil {
 		handlerJsonError(w, err)
 		return
@@ -277,7 +294,7 @@ func handlerInstanceArrSet(w http.ResponseWriter, r *http.Request) {
 	}
 
 	instanceName := r.URL.Query().Get(":instance")
-	instance, err := db.Get(instanceName)
+	instance, err := Db.Get(instanceName)
 	if  err != nil {
 		handlerJsonError(w, err)
 		return
@@ -303,7 +320,7 @@ func handlerInstanceHashSet(w http.ResponseWriter, r *http.Request) {
 	}
 
 	instanceName := r.URL.Query().Get(":instance")
-	instance, err := db.Get(instanceName)
+	instance, err := Db.Get(instanceName)
 	if  err != nil {
 		handlerJsonError(w, err)
 		return
@@ -334,7 +351,7 @@ func handlerInstanceHashDel(w http.ResponseWriter, r *http.Request) {
 	}
 
 	instanceName := r.URL.Query().Get(":instance")
-	instance, err := db.Get(instanceName)
+	instance, err := Db.Get(instanceName)
 	if  err != nil {
 		handlerJsonError(w, err)
 		return
@@ -365,7 +382,7 @@ func handlerInstanceHashGet(w http.ResponseWriter, r *http.Request) {
 	}
 
 	instanceName := r.URL.Query().Get(":instance")
-	instance, err := db.Get(instanceName)
+	instance, err := Db.Get(instanceName)
 	if  err != nil {
 		handlerJsonError(w, err)
 		return
@@ -393,7 +410,7 @@ func handlerDatabaseCreate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = db.Create(data["name"])
+	err = Db.Create(data["name"])
 	if err != nil {
 		handlerJsonError(w, err)
 		return
@@ -404,8 +421,8 @@ func handlerDatabaseCreate(w http.ResponseWriter, r *http.Request) {
 func handlerDatabaseList(w http.ResponseWriter, r *http.Request) {
 	handlerJson(w, http.StatusOK, &RespondJson{
 		"status": "OK",
-		"count": db.Len(),
-		"names": db.Keys(),
+		"count": Db.Len(),
+		"names": Db.Keys(),
 	})
 }
 
@@ -419,7 +436,7 @@ func handlerInstanceDestroy(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	db.Delete(data["name"])
+	Db.Delete(data["name"])
 	handlerJsonOk(w);
 }
 
@@ -446,7 +463,7 @@ func handlerJsonOk(w http.ResponseWriter) {
 
 func handlerInstanceInfo(w http.ResponseWriter, r *http.Request) {
 	instanceName := r.URL.Query().Get(":instance")
-	instance, err := db.Get(instanceName)
+	instance, err := Db.Get(instanceName)
 	if  err != nil {
 		handlerJsonError(w, err)
 		return
@@ -461,7 +478,7 @@ func handlerInstanceInfo(w http.ResponseWriter, r *http.Request) {
 
 func handlerInstanceGet(w http.ResponseWriter, r *http.Request) {
 	instanceName := r.URL.Query().Get(":instance")
-	instance, err := db.Get(instanceName)
+	instance, err := Db.Get(instanceName)
 	if  err != nil {
 		handlerJsonError(w, err)
 		return
@@ -481,7 +498,7 @@ func handlerInstanceGet(w http.ResponseWriter, r *http.Request) {
 
 func handlerInstanceDel(w http.ResponseWriter, r *http.Request) {
 	instanceName := r.URL.Query().Get(":instance")
-	instance, err := db.Get(instanceName)
+	instance, err := Db.Get(instanceName)
 	if  err != nil {
 		handlerJsonError(w, err)
 		return
@@ -509,7 +526,7 @@ func handlerInstanceSetString(w http.ResponseWriter, r *http.Request) {
 	}
 
 	instanceName := r.URL.Query().Get(":instance")
-	instance, err := db.Get(instanceName)
+	instance, err := Db.Get(instanceName)
 	if  err != nil {
 		handlerJsonError(w, err)
 		return
@@ -548,7 +565,7 @@ func handlerInstanceSetArray(w http.ResponseWriter, r *http.Request) {
 	}
 
 	instanceName := r.URL.Query().Get(":instance")
-	instance, err := db.Get(instanceName)
+	instance, err := Db.Get(instanceName)
 	if  err != nil {
 		handlerJsonError(w, err)
 		return
@@ -587,7 +604,7 @@ func handlerInstanceSetHash(w http.ResponseWriter, r *http.Request) {
 	}
 
 	instanceName := r.URL.Query().Get(":instance")
-	instance, err := db.Get(instanceName)
+	instance, err := Db.Get(instanceName)
 	if  err != nil {
 		handlerJsonError(w, err)
 		return

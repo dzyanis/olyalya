@@ -10,11 +10,17 @@ import (
 	"encoding/json"
 	"github.com/dzyanis/olyalya/cmd"
 	"github.com/dzyanis/olyalya/client"
+	"flag"
 )
 
 var (
 	ErrNotEnoughArguments = errors.New("Not enough arguments")
 	ErrCanNotExit = errors.New("Something really went wrong")
+)
+
+var (
+	httpUrl  = flag.String("http.url", "localhost", "HTTP listen URL")
+	httpPort = flag.Int("http.port", 3000, "HTTP listen port")
 )
 
 const HelpInformation = `Command is not exist.
@@ -553,7 +559,9 @@ func handleDestroy(c *cmd.Cmd, args []string, line string) (string, error) {
 }
 
 func init() {
-	Client = client.NewClient("localhost", 5555)
+	flag.Parse()
+
+	Client = client.NewClient(*httpUrl, *httpPort)
 
 	Cmd.Add("HELP", &cmd.Command{
 		Title: "Function show information about other functions",

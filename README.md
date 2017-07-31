@@ -4,22 +4,22 @@ OLL is simple implementation of Redis-like in-memory cache database with HTTP/JS
 It's not the best database, but good example of.
 
 It includes three part:
-- [Server](olldb/API.md)
-- [Client Library](client/)
-- [Commondline Client](oll-cli/COMMANDS.md)
+- [Server](server/API.md)
+- [Client Library](pkg/client/)
+- [Commondline Client](cli/COMMANDS.md)
 
 
 ##How to run
 Install and launch database:
 ```bash
-go install github.com/dzyanis/olyalya/olldb
-$GOPATH/bin/olldb
+go install github.com/dzyanis/olyalya/server
+$GOPATH/bin/server
 ```
 
 Install and launch commandline client:
 ```bash
-go install github.com/dzyanis/olyalya/oll-cli
-$GOPATH/bin/oll-cli
+go install github.com/dzyanis/olyalya/cli
+$GOPATH/bin/cli
 ```
 
 

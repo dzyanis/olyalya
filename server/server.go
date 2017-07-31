@@ -3,7 +3,7 @@ package main
 
 import (
 	"flag"
-	"github.com/dzyanis/olyalya/database"
+	"github.com/dzyanis/olyalya/pkg/database"
 	"github.com/gorilla/pat"
 	"log"
 	"net/http"

@@ -8,8 +8,8 @@ import (
 	"strings"
 	"strconv"
 	"encoding/json"
-	"github.com/dzyanis/olyalya/cmd"
-	"github.com/dzyanis/olyalya/client"
+	"github.com/dzyanis/olyalya/pkg/cmd"
+	"github.com/dzyanis/olyalya/pkg/client"
 	"flag"
 )
 

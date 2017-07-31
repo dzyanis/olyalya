@@ -1,4 +1,4 @@
-#API
+# API
 ## Error
 Example:
 ```json
@@ -9,24 +9,24 @@ Example:
 ```
 
 ## Instances commands
-###Create a new instance
-####Request
+### Create a new instance
+#### Request
 - Path: /create
 - Method: POST
 - Body:
 ```json
 {"name": "instance_name"}
 ```
-####Respond
+#### Respond
 ```json
 {"status":"OK"}
 ```
 
-###List of an instance
-####Request
+### List of an instance
+#### Request
 - Path: /list
 - Method: GET
-####Respond
+#### Respond
 ```json
 {
   "status": "OK",
@@ -39,36 +39,36 @@ Example:
 }
 ```
 
-###Remove an instance
-####Request
+### Remove an instance
+#### Request
 - Path: /destroy
 - Method: DELETE
-####Respond
+#### Respond
 ```json
 {"status":"OK"}
 ```
 
 ## String commands
-###Get a string
-####Request
+### Get a string
+#### Request
 - Path: /in/:intrance_name/get/:variable_name
 - Method: GET
-####Respond
+#### Respond
 ```json
 {"value":"1"}
 ```
 
-###Delete
-####Request
+### Delete
+#### Request
 - Path: /in/:intrance_name/del/:variable_name
 - Method: DELETE
-####Respond
+#### Respond
 ```json
 {"status":"OK"}
 ```
 
-###Set a string
-####Request
+### Set a string
+#### Request
 - Path: /in/:intrance_name/set
 - Method: POST
 - Body:
@@ -78,14 +78,14 @@ Example:
   "value": "value"
 }
 ```
-####Respond
+#### Respond
 ```json
 {"status":"OK"}
 ```
 
 ## Time to Live commands
-###Set the expire time (TTL)
-####Request
+### Set the expire time (TTL)
+#### Request
 - Path: /in/:intrance_name/ttl/set
 - Method: POST
 - Body:
@@ -95,27 +95,27 @@ Example:
     "ttl": 42
 }
 ```
-####Respond
+#### Respond
 ```json
 {"status":"OK"}
 ```
 
-###Remove the expire time (TTL)
-####Request
+### Remove the expire time (TTL)
+#### Request
 - Path: /in/:intrance_name/ttl/del
 - Method: DELETE
 - Body:
 ```json
 {"name": "variable_name"}
 ```
-####Respond
+#### Respond
 ```json
 {"status":"OK"}
 ```
 
 ## Array commands
-###Set an array
-####Request
+### Set an array
+#### Request
 - Path: /in/:instance_name/arr/set
 - Method: POST
 - Body:
@@ -126,13 +126,13 @@ Example:
   "ttl":    0
 }
 ```
-####Respond
+#### Respond
 ```json
 {"status":"OK"}
 ```
 
-###Get an element of an array
-####Request
+### Get an element of an array
+#### Request
 - Path: /in/:intrance_name/arr/el/get
 - Method: GET
 - Body:
@@ -142,7 +142,7 @@ Example:
   "index": 2
 }
 ```
-####Respond
+#### Respond
 ```json
 {
   "status": "OK",
@@ -150,8 +150,8 @@ Example:
 }
 ```
 
-###Add a string to an array
-####Request
+### Add a string to an array
+#### Request
 - Path: /in/:intrance_name/arr/el/add
 - Method: POST
 - Body:
@@ -161,13 +161,13 @@ Example:
   "value": "value"
 }
 ```
-####Respond
+#### Respond
 ```json
 {"status":"OK"}
 ```
 
-###Set/Update an element of an array
-####Request
+### Set/Update an element of an array
+#### Request
 - Path: /in/:intrance_name/arr/el/set
 - Method: POST
 - Body:
@@ -178,13 +178,13 @@ Example:
   "value": "string"
 }
 ```
-####Respond
+#### Respond
 ```json
 {"status":"OK"}
 ```
 
-###Remove an element of an array
-####Request
+### Remove an element of an array
+#### Request
 - Path: /in/:intrance_name/arr/el/del
 - Method: DELETE
 - Body:
@@ -194,14 +194,14 @@ Example:
   "index": 0
 }
 ```
-####Respond
+#### Respond
 ```json
 {"status":"OK"}
 ```
 
 ## Hash commands
-###Set a hash of strings.
-####Request
+### Set a hash of strings.
+#### Request
 - Path: /in/:intrance_name/hash/set
 - Method: POST
 - Body:
@@ -214,13 +214,13 @@ Example:
   }
 }
 ```
-####Respond
+#### Respond
 ```json
 {"status":"OK"}
 ```
 
-###Get an element of a hash
-####Request
+### Get an element of a hash
+#### Request
 - Path: /in/:intrance_name/hash/el/get
 - Method: GET
 - Body:
@@ -230,7 +230,7 @@ Example:
   "key": "key_name"
 }
 ```
-####Respond
+#### Respond
 ```json
 {
   "status": "OK",
@@ -238,8 +238,8 @@ Example:
 }
 ```
 
-###Set/Update an element of a hash
-####Request
+### Set/Update an element of a hash
+#### Request
 - Path: /in/:intrance_name/hash/el/set
 - Method: POST
 - Body:
@@ -250,13 +250,13 @@ Example:
   "value": "string"
 }
 ```
-####Respond
+#### Respond
 ```json
 {"status":"OK"}
 ```
 
-###Remove an element of a hash
-####Request
+### Remove an element of a hash
+#### Request
 - Path: /in/:intrance_name/hash/el/del
 - Method: DELETE
 - Body:
@@ -266,7 +266,7 @@ Example:
   "key":   "key_name"
 }
 ```
-####Respond
+#### Respond
 ```json
 {"status":"OK"}
 ```

@@ -1,4 +1,4 @@
-package client
+package client_test
 
 import (
 	"testing"
@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"bytes"
 	"io/ioutil"
+
+	client "github.com/dzyanis/olyalya/pkg/client"
 )
 
 func TestCreate(t *testing.T) {
@@ -25,7 +27,7 @@ func TestCreate(t *testing.T) {
 	}))
 	defer ts.Close()
 
-	cln := NewClient(ts.URL)
+	cln := client.NewClient(ts.URL)
 	err := cln.CreateInstance("dz")
 	if err != nil {
 		t.Error(err)
@@ -48,7 +50,7 @@ func TestSelectUnexist(t *testing.T) {
 	}))
 	defer ts.Close()
 
-	cln := NewClient(ts.URL)
+	cln := client.NewClient(ts.URL)
 	err := cln.SelectInstance("unexist")
 	if err == nil {
 		t.Error("Unexpected result")
@@ -71,7 +73,7 @@ func TestSelectOk(t *testing.T) {
 	}))
 	defer ts.Close()
 
-	cln := NewClient(ts.URL)
+	cln := client.NewClient(ts.URL)
 	err := cln.SelectInstance("dz")
 	if err != nil {
 		t.Error(err)
@@ -286,7 +288,7 @@ func TestDestroy(t *testing.T) {
 	}))
 	defer ts.Close()
 
-	cln := NewClient(ts.URL)
+	cln := client.NewClient(ts.URL)
 	err := cln.Destroy("dz")
 	if err != nil {
 		t.Error(err)

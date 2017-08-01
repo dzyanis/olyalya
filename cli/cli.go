@@ -19,8 +19,7 @@ var (
 )
 
 var (
-	httpUrl  = flag.String("http.url", "localhost", "HTTP listen URL")
-	httpPort = flag.Int("http.port", 3000, "HTTP listen port")
+	httpUrl  = flag.String("http.url", "localhost:3000", "HTTP listen URL")
 )
 
 const HelpInformation = `Command is not exist.
@@ -561,7 +560,7 @@ func handleDestroy(c *cmd.Cmd, args []string, line string) (string, error) {
 func init() {
 	flag.Parse()
 
-	Client = client.NewClient(*httpUrl, *httpPort)
+	Client = client.NewClient(*httpUrl)
 
 	Cmd.Add("HELP", &cmd.Command{
 		Title:       "Function show information about other functions",

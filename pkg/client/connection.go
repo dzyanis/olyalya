@@ -10,29 +10,29 @@ import (
 )
 
 type Connection struct {
-	Addr string
-	Port int
-	Http *http.Client
+	url        string
+	httpClient *http.Client
 }
 
-func NewConnection(addr string, port int) *Connection {
+func NewConnection(url string) *Connection {
 	var netTransport = &http.Transport{
 		Dial:                (&net.Dialer{Timeout: 5 * time.Second}).Dial,
 		TLSHandshakeTimeout: 5 * time.Second,
 	}
+
 	var http = &http.Client{
 		Timeout:   time.Second * 10,
 		Transport: netTransport,
 	}
+
 	return &Connection{
-		Addr: addr,
-		Port: port,
-		Http: http,
+		url:        url,
+		httpClient: http,
 	}
 }
 
 func (c *Connection) Url(uri string) string {
-	return fmt.Sprintf("http://%s:%d%s", c.Addr, c.Port, uri)
+	return fmt.Sprintf("%s%s", c.url, uri)
 }
 
 func (c *Connection) request(method string, url string, data map[string]interface{}) (*http.Response, error) {
@@ -46,7 +46,7 @@ func (c *Connection) request(method string, url string, data map[string]interfac
 		return nil, err
 	}
 	req.Header.Set("Content-Type", "application/json")
-	return c.Http.Do(req)
+	return c.httpClient.Do(req)
 }
 
 func (c *Connection) Put(uri string, data map[string]interface{}) (*http.Response, error) {

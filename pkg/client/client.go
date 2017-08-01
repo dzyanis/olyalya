@@ -75,9 +75,9 @@ var (
 )
 
 // Constructor
-func NewClient(addr string, port int) *Client {
+func NewClient(url string) *Client {
 	return &Client{
-		conn: NewConnection(addr, port),
+		conn: NewConnection(url),
 	}
 }
 

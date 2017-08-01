@@ -21,7 +21,7 @@ func CurrentUnixTime() uint {
 }
 
 func (ext *ExtensionExpire) setTTL(key string, second uint) {
-	ext.ttl[key] = CurrentUnixTime()+second
+	ext.ttl[key] = CurrentUnixTime() + second
 }
 
 func (ext *ExtensionExpire) GetTTL(key string) uint {
@@ -35,7 +35,7 @@ func (ext *ExtensionExpire) hasTTL(key string) bool {
 }
 
 func (ext *ExtensionExpire) Diff(key string) uint {
-	return ext.GetTTL(key)-CurrentUnixTime()
+	return ext.GetTTL(key) - CurrentUnixTime()
 }
 
 func (ext *ExtensionExpire) isExpire(key string) bool {
@@ -57,5 +57,5 @@ func (ext *ExtensionExpire) getExpiredKeys() []string {
 			_ = append(expiredKeys, k)
 		}
 	}
-	return expiredKeys;
+	return expiredKeys
 }

@@ -1,9 +1,9 @@
 package database
 
 import (
-	"sync"
 	"errors"
 	"reflect"
+	"sync"
 )
 
 type (
@@ -17,22 +17,22 @@ type Instance struct {
 }
 
 var (
-	ErrInstanceUnknownType = errors.New("Unknown type")
+	ErrInstanceUnknownType      = errors.New("Unknown type")
 	ErrInstanceVariableNotExist = errors.New("Variable is not exist")
-	ErrInstanceNotExist = errors.New("Item Not exist")
+	ErrInstanceNotExist         = errors.New("Item Not exist")
 	//ErrInstanceConvertToInt = errors.New("Convert to int")
 	ErrInstanceValueWasExpired = errors.New("Value was expired")
 
-	ErrInstanceValueIsNotArr = errors.New("Value is not array")
+	ErrInstanceValueIsNotArr      = errors.New("Value is not array")
 	ErrInstanceArrIndexIsNotExist = errors.New("Index is not exist")
 
-	ErrInstanceValueIsNotHash = errors.New("Value is not hash")
+	ErrInstanceValueIsNotHash    = errors.New("Value is not hash")
 	ErrInstanceHashKeyIsNotExist = errors.New("Key is not exist")
 )
 
 func NewInstance() *Instance {
 	return &Instance{
-		base: make(InstanceTypeBase),
+		base:            make(InstanceTypeBase),
 		ExtensionExpire: NewExtensionExpire(),
 	}
 }
@@ -156,7 +156,7 @@ func (o *Instance) ArrDel(name string, index uint) error {
 	defer o.Unlock()
 
 	err := o.arrAccess(name, index)
-	if err!=nil {
+	if err != nil {
 		return err
 	}
 	if o.checkExpired(name) {
@@ -174,7 +174,7 @@ func (o *Instance) ArrGet(name string, index uint) (string, error) {
 	defer o.RUnlock()
 
 	err := o.arrAccess(name, index)
-	if err!=nil {
+	if err != nil {
 		return "", err
 	}
 	if o.checkExpired(name) {
@@ -305,6 +305,6 @@ func (o *Instance) GetExpiredKeys() []string {
 
 func (o *Instance) Cleaner() {
 	for _, k := range o.GetExpiredKeys() {
-		o.Del(k);
+		o.Del(k)
 	}
 }

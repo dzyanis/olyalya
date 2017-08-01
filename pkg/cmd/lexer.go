@@ -2,7 +2,7 @@
 // @todo Fixed a problem \\" for strings
 package cmd
 
-import(
+import (
 	"errors"
 	"regexp"
 )
@@ -27,9 +27,9 @@ const (
 
 type Lexer struct {
 	typeTerm int
-	status int
-	curTerm string
-	terms []string
+	status   int
+	curTerm  string
+	terms    []string
 }
 
 func NewLexer() *Lexer {
@@ -104,7 +104,7 @@ func (lx *Lexer) IsSpace(b byte) bool {
 func (lx *Lexer) Parse(cmd string) ([]string, error) {
 	for _, symbol := range cmd {
 		err := lx.Step(byte(symbol))
-		if err!=nil {
+		if err != nil {
 			return []string{}, err
 		}
 	}

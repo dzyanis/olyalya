@@ -10,15 +10,15 @@ import (
 
 // Basic JSON answer
 type Json struct {
-	Status string	`json:"status"`
-	Error string	`json:"error"`
+	Status string `json:"status"`
+	Error  string `json:"error"`
 
-	Value string	`json:"value"`
+	Value string `json:"value"`
 
-	Count int 	`json:"count"`
-	Names []string	`json:"names"`
+	Count int      `json:"count"`
+	Names []string `json:"names"`
 
-	Length int 	`json:"length"`
+	Length int `json:"length"`
 }
 
 func JsonReader(body *io.ReadCloser) (Json, error) {
@@ -33,9 +33,9 @@ func JsonReader(body *io.ReadCloser) (Json, error) {
 
 // JSON answer for an array
 type JsonArr struct {
-	Status string	`json:"status"`
-	Error string	`json:"error"`
-	Value []string	`json:"value"`
+	Status string   `json:"status"`
+	Error  string   `json:"error"`
+	Value  []string `json:"value"`
 }
 
 func JsonArrayReader(body *io.ReadCloser) (JsonArr, error) {
@@ -50,9 +50,9 @@ func JsonArrayReader(body *io.ReadCloser) (JsonArr, error) {
 
 // JSON answer for a hash
 type JsonHash struct {
-	Status string		`json:"status"`
-	Error string		`json:"error"`
-	Value map[string]string `json:"value"`
+	Status string            `json:"status"`
+	Error  string            `json:"error"`
+	Value  map[string]string `json:"value"`
 }
 
 func JsonHashReader(body *io.ReadCloser) (JsonHash, error) {
@@ -66,7 +66,7 @@ func JsonHashReader(body *io.ReadCloser) (JsonHash, error) {
 }
 
 type Client struct {
-	conn *Connection
+	conn     *Connection
 	instName string
 }
 
@@ -188,9 +188,9 @@ func (c *Client) SetArray(name string, value []string, ttl int) error {
 	}
 
 	req, err := c.conn.Post(fmt.Sprintf("/in/%s/arr/set", c.instName), map[string]interface{}{
-		"name": name,
+		"name":  name,
 		"value": value,
-		"ttl": ttl,
+		"ttl":   ttl,
 	})
 	if err != nil {
 		return err
@@ -266,9 +266,9 @@ func (c *Client) SetHash(name string, value map[string]string, ttl int) error {
 	}
 
 	req, err := c.conn.Post(fmt.Sprintf("/in/%s/hash/set", c.instName), map[string]interface{}{
-		"name": name,
+		"name":  name,
 		"value": value,
-		"ttl": ttl,
+		"ttl":   ttl,
 	})
 	if err != nil {
 		return err
@@ -296,7 +296,7 @@ func (c *Client) SetTTL(name string, ttl int) error {
 	path := fmt.Sprintf("/in/%s/ttl/set", c.instName)
 	_, err := c.simpleRequest("POST", path, map[string]interface{}{"instance": c.instName,
 		"name": name,
-		"ttl": ttl,
+		"ttl":  ttl,
 	})
 
 	if err != nil {
@@ -305,6 +305,7 @@ func (c *Client) SetTTL(name string, ttl int) error {
 
 	return nil
 }
+
 // Remove time to live for variable
 func (c *Client) DelTTL(name string) error {
 	if err := c.checkContext(); err != nil {
@@ -379,7 +380,7 @@ func (c *Client) GetArrayElement(name string, index int) (string, error) {
 	}
 
 	req, err := c.conn.Get(fmt.Sprintf("/in/%s/arr/el/get", c.instName), map[string]interface{}{
-		"name": name,
+		"name":  name,
 		"index": index,
 	})
 	if err != nil {
@@ -424,7 +425,7 @@ func (c *Client) DelArrayElement(name string, index int) error {
 
 	path := fmt.Sprintf("/in/%s/arr/el/del", c.instName)
 	_, err := c.simpleRequest("DELETE", path, map[string]interface{}{
-		"name": name,
+		"name":  name,
 		"index": index,
 	})
 	if err != nil {
@@ -477,8 +478,8 @@ func (c *Client) GetHashElement(name string, key string) (string, error) {
 
 	path := fmt.Sprintf("/in/%s/hash/el/get", c.instName)
 	res, err := c.simpleRequest("GET", path, map[string]interface{}{
-		"name":  name,
-		"key":   key,
+		"name": name,
+		"key":  key,
 	})
 
 	if err != nil {
@@ -495,8 +496,8 @@ func (c *Client) DelHashElement(name string, key string) error {
 
 	path := fmt.Sprintf("/in/%s/hash/el/del", c.instName)
 	_, err := c.simpleRequest("DELETE", path, map[string]interface{}{
-		"name":  name,
-		"key":   key,
+		"name": name,
+		"key":  key,
 	})
 
 	if err != nil {
@@ -537,7 +538,7 @@ func (c *Client) Destroy(name string) error {
 	}
 
 	_, err := c.simpleRequest("DELETE", "/destroy", map[string]interface{}{
-		"name":  name,
+		"name": name,
 	})
 
 	if err != nil {

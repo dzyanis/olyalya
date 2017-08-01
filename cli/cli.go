@@ -2,20 +2,20 @@ package main
 
 import (
 	"bufio"
-	"fmt"
-	"os"
-	"errors"
-	"strings"
-	"strconv"
 	"encoding/json"
-	"github.com/dzyanis/olyalya/pkg/cmd"
-	"github.com/dzyanis/olyalya/pkg/client"
+	"errors"
 	"flag"
+	"fmt"
+	"github.com/dzyanis/olyalya/pkg/client"
+	"github.com/dzyanis/olyalya/pkg/cmd"
+	"os"
+	"strconv"
+	"strings"
 )
 
 var (
 	ErrNotEnoughArguments = errors.New("Not enough arguments")
-	ErrCanNotExit = errors.New("Something really went wrong")
+	ErrCanNotExit         = errors.New("Something really went wrong")
 )
 
 var (
@@ -29,7 +29,7 @@ Run 'HELP' for usage or read more on https://github.com/dzyanis/olyalya
 
 var (
 	Client *client.Client
-	Cmd = cmd.NewCmd()
+	Cmd    = cmd.NewCmd()
 )
 
 func ValidCountArguments(args []string, min int) error {
@@ -40,7 +40,7 @@ func ValidCountArguments(args []string, min int) error {
 }
 
 func ValidInt(s string) (int, error) {
-	i, err := strconv.Atoi(s);
+	i, err := strconv.Atoi(s)
 	if err != nil {
 		return 0, err
 	}
@@ -70,7 +70,7 @@ func ValidHash(s string) (map[string]string, error) {
 
 func handlerHelp(c *cmd.Cmd, args []string, line string) (string, error) {
 	if len(args) > 1 {
-		command, ok := c.Commands[ args[1] ]
+		command, ok := c.Commands[args[1]]
 		if !ok {
 			return "", cmd.ErrCommandNotExist
 		}
@@ -79,9 +79,9 @@ func handlerHelp(c *cmd.Cmd, args []string, line string) (string, error) {
 	}
 
 	command, _ := c.Commands[args[0]]
-	result := fmt.Sprintf("%s\n%s\n\nList of commands:", command.Title, command.Description);
+	result := fmt.Sprintf("%s\n%s\n\nList of commands:", command.Title, command.Description)
 	for name, command := range c.Commands {
-		result = result + fmt.Sprintf("\n%s - %s", name, command.Title);
+		result = result + fmt.Sprintf("\n%s - %s", name, command.Title)
 	}
 
 	return result, nil
@@ -89,7 +89,7 @@ func handlerHelp(c *cmd.Cmd, args []string, line string) (string, error) {
 
 func handlerList(c *cmd.Cmd, args []string, line string) (string, error) {
 	list, err := Client.ListInstances()
-	if err!=nil {
+	if err != nil {
 		return "", err
 	}
 	result := ""
@@ -116,7 +116,7 @@ func handlerSetTTL(c *cmd.Cmd, args []string, line string) (string, error) {
 	}
 
 	err = Client.SetTTL(name, ttl)
-	if err!=nil {
+	if err != nil {
 		return "", err
 	}
 
@@ -135,7 +135,7 @@ func handlerDeleteTTL(c *cmd.Cmd, args []string, line string) (string, error) {
 	}
 
 	err = Client.DelTTL(name)
-	if err!=nil {
+	if err != nil {
 		return "", err
 	}
 
@@ -220,9 +220,9 @@ func handleKeys(c *cmd.Cmd, args []string, line string) (string, error) {
 		return "", err
 	}
 
-	result := "";
+	result := ""
 	for ind, key := range list {
-		result = result + fmt.Sprintf("%d) %s\n", ind+1, key);
+		result = result + fmt.Sprintf("%d) %s\n", ind+1, key)
 	}
 
 	return result, nil
@@ -246,7 +246,7 @@ func handleInstanceSet(c *cmd.Cmd, args []string, line string) (string, error) {
 
 	ttl := 0
 	if len(args) > 3 {
-		ttl, _ = strconv.Atoi(args[3]);
+		ttl, _ = strconv.Atoi(args[3])
 	}
 
 	err = Client.Set(name, str, ttl)
@@ -275,7 +275,7 @@ func handlerHashSet(c *cmd.Cmd, args []string, line string) (string, error) {
 
 	ttl := 0
 	if len(args) > 3 {
-		ttl, _ = strconv.Atoi(args[3]);
+		ttl, _ = strconv.Atoi(args[3])
 	}
 
 	err = Client.SetHash(name, h, ttl)
@@ -307,7 +307,7 @@ func handleInstanceArraySet(c *cmd.Cmd, args []string, line string) (string, err
 
 	ttl := 0
 	if len(args) > 3 {
-		ttl, _ = strconv.Atoi(args[3]);
+		ttl, _ = strconv.Atoi(args[3])
 	}
 
 	err = Client.SetArray(name, arr, ttl)
@@ -564,131 +564,131 @@ func init() {
 	Client = client.NewClient(*httpUrl, *httpPort)
 
 	Cmd.Add("HELP", &cmd.Command{
-		Title: "Function show information about other functions",
+		Title:       "Function show information about other functions",
 		Description: "Example: HELP <FUNCTION_NAME>",
-		Handler: handlerHelp,
+		Handler:     handlerHelp,
 	})
 	Cmd.Add("ECHO", &cmd.Command{
-		Title: "Prints string",
+		Title:       "Prints string",
 		Description: "Example: ECHO \"Hello World!\"",
-		Handler: handleEcho,
+		Handler:     handleEcho,
 	})
 	Cmd.Add("EXIT", &cmd.Command{
-		Title: "Exit from the program",
+		Title:       "Exit from the program",
 		Description: "",
-		Handler: handleExit,
+		Handler:     handleExit,
 	})
 
 	Cmd.Add("CREATE", &cmd.Command{
-		Title: "Create an instance",
+		Title:       "Create an instance",
 		Description: "Example: CREATE dbname",
-		Handler: handleInstanceCreate,
+		Handler:     handleInstanceCreate,
 	})
 
 	Cmd.Add("LIST", &cmd.Command{
-		Title: "Show list of instance",
+		Title:       "Show list of instance",
 		Description: "Example: LIST",
-		Handler: handlerList,
+		Handler:     handlerList,
 	})
 
 	Cmd.Add("SELECT", &cmd.Command{
-		Title: "Select an instance",
+		Title:       "Select an instance",
 		Description: "Example: SELECT instance_name",
-		Handler: handleInstanceSelect,
+		Handler:     handleInstanceSelect,
 	})
 
 	Cmd.Add("KEYS", &cmd.Command{
-		Title: "Show all keys",
+		Title:       "Show all keys",
 		Description: "Example: KEYS",
-		Handler: handleKeys,
+		Handler:     handleKeys,
 	})
 	Cmd.Add("SET", &cmd.Command{
-		Title: "Set value",
+		Title:       "Set value",
 		Description: "Example: SET name \"value\" ttl",
-		Handler: handleInstanceSet,
+		Handler:     handleInstanceSet,
 	})
 	Cmd.Add("GET", &cmd.Command{
-		Title: "Get value",
+		Title:       "Get value",
 		Description: "Example: GET name",
-		Handler: handleInstanceGet,
+		Handler:     handleInstanceGet,
 	})
 	Cmd.Add("DEL", &cmd.Command{
-		Title: "Delete value",
+		Title:       "Delete value",
 		Description: "Example: DEL name",
-		Handler: handleInstanceDel,
+		Handler:     handleInstanceDel,
 	})
 
 	Cmd.Add("TTL/SET", &cmd.Command{
-		Title: "Set time to live",
+		Title:       "Set time to live",
 		Description: "Example: TTL/SET mayfly 86400",
-		Handler: handlerSetTTL,
+		Handler:     handlerSetTTL,
 	})
 	Cmd.Add("TTL/DEL", &cmd.Command{
-		Title: "Remove time to live",
+		Title:       "Remove time to live",
 		Description: "Example: TTL/DEL mayfly",
-		Handler: handlerDeleteTTL,
+		Handler:     handlerDeleteTTL,
 	})
 
 	Cmd.Add("ARR/SET", &cmd.Command{
-		Title: "Set array",
+		Title:       "Set array",
 		Description: "Example: ARR/SET name [] ttl",
-		Handler: handleInstanceArraySet,
+		Handler:     handleInstanceArraySet,
 	})
 	Cmd.Add("ARR/GET", &cmd.Command{
-		Title: "Get array",
+		Title:       "Get array",
 		Description: "Example: ARR/GET name",
-		Handler: handleArrayGet,
+		Handler:     handleArrayGet,
 	})
 	Cmd.Add("ARR/EL/GET", &cmd.Command{
-		Title: "Returns the element associated with index",
+		Title:       "Returns the element associated with index",
 		Description: "Example: ARR/EL/GET name index",
-		Handler: handleArrayElementGet,
+		Handler:     handleArrayElementGet,
 	})
 	Cmd.Add("ARR/EL/ADD", &cmd.Command{
-		Title: "Add the element to an array",
+		Title:       "Add the element to an array",
 		Description: "Example: ",
-		Handler: handleArrayElementAdd,
+		Handler:     handleArrayElementAdd,
 	})
 	Cmd.Add("ARR/EL/SET", &cmd.Command{
-		Title: "Set the element of an array",
+		Title:       "Set the element of an array",
 		Description: "Example: ",
-		Handler: handleArrayElementSet,
+		Handler:     handleArrayElementSet,
 	})
 	Cmd.Add("ARR/EL/DEL", &cmd.Command{
-		Title: "Delete the element of an array",
+		Title:       "Delete the element of an array",
 		Description: "Example:",
-		Handler: handleArrayElementDel,
+		Handler:     handleArrayElementDel,
 	})
 
 	Cmd.Add("HASH/GET", &cmd.Command{
-		Title: "Get a hash",
+		Title:       "Get a hash",
 		Description: "Example: HASH/GET name",
-		Handler: handleHashGet,
+		Handler:     handleHashGet,
 	})
 	Cmd.Add("HASH/SET", &cmd.Command{
-		Title: "Set a hash",
+		Title:       "Set a hash",
 		Description: "Example: HASH/SET name {}",
-		Handler: handlerHashSet,
+		Handler:     handlerHashSet,
 	})
 	Cmd.Add("HASH/EL/GET", &cmd.Command{
-		Title: "Get the element of a hash",
+		Title:       "Get the element of a hash",
 		Description: "Example:",
-		Handler: handleHashElementGet,
+		Handler:     handleHashElementGet,
 	})
 	Cmd.Add("HASH/EL/SET", &cmd.Command{
-		Title: "Set the element of a hash",
+		Title:       "Set the element of a hash",
 		Description: "Example:",
-		Handler: handleHashElementSet,
+		Handler:     handleHashElementSet,
 	})
 	Cmd.Add("HASH/EL/DEL", &cmd.Command{
-		Title: "Delete the element of a hash",
+		Title:       "Delete the element of a hash",
 		Description: "Example:",
-		Handler: handleHashElementDel,
+		Handler:     handleHashElementDel,
 	})
 	Cmd.Add("DESTROY", &cmd.Command{
-		Title: "Remove instance",
+		Title:       "Remove instance",
 		Description: "Example: DESTROY instance_name",
-		Handler: handleDestroy,
+		Handler:     handleDestroy,
 	})
 }
 
@@ -699,14 +699,14 @@ func main() {
 	for {
 		fmt.Printf("%s> ", Client.CurrentInstanceName())
 		cli, err := reader.ReadString('\n')
-		if err!=nil {
+		if err != nil {
 			fmt.Printf("ERROR: %s\n", err.Error())
 			continue
 		}
 
 		result, err := Cmd.Run(cli)
 		if err != nil {
-			if cmd.ErrCommandNotExist == err  {
+			if cmd.ErrCommandNotExist == err {
 				fmt.Printf(HelpInformation)
 			} else {
 				fmt.Printf("ERROR: %s\n", err.Error())

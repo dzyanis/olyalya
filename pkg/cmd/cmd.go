@@ -9,9 +9,9 @@ var (
 )
 
 type Command struct {
-	Title string
+	Title       string
 	Description string
-	Handler func(*Cmd, []string, string) (string, error)
+	Handler     func(*Cmd, []string, string) (string, error)
 }
 
 type Cmd struct {
@@ -31,14 +31,14 @@ func (c *Cmd) Add(name string, rec *Command) {
 func (c *Cmd) Run(cli string) (string, error) {
 	lexer := NewLexer()
 	lexems, err := lexer.Parse(cli)
-	if err!=nil {
+	if err != nil {
 		return "", err
 	}
 	if len(lexems) < 1 {
 		return "", ErrCommandNotExist
 	}
 
-	command, ok := c.Commands[ lexems[0] ]
+	command, ok := c.Commands[lexems[0]]
 	if !ok {
 		return "", ErrCommandNotExist
 	}

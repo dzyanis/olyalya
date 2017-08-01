@@ -34,7 +34,7 @@ func TestIsExpireTTL(t *testing.T) {
 	if o.isExpire("2sec") {
 		t.Errorf("Now '%d'. Date '%d' was expired.", CurrentUnixTime(), o.GetTTL("2sec"))
 	}
-	time.Sleep(2*time.Second)
+	time.Sleep(2 * time.Second)
 	if !o.isExpire("2sec") {
 		t.Errorf("Now '%d'. Date '%d' doesn't expired.", CurrentUnixTime(), o.GetTTL("2sec"))
 	}

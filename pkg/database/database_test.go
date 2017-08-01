@@ -23,18 +23,18 @@ func TestGetInstance(t *testing.T) {
 	db := NewDatabase()
 	db.Create("dz")
 	instance, err := db.Get("dz")
-	if err!=nil {
+	if err != nil {
 		t.Error(err)
 	}
 	instance.Set("one", "1")
 
 	instance, err = db.Get("dz")
-	if err!=nil {
+	if err != nil {
 		t.Error(err)
 	}
 
 	v, _ := instance.Get("one")
-	if  v!= "1" {
+	if v != "1" {
 		t.Error("Problem with instance")
 	}
 }

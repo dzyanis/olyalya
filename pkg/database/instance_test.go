@@ -1,8 +1,8 @@
 package database
 
 import (
-	"testing"
 	"reflect"
+	"testing"
 )
 
 func TestGetSet(t *testing.T) {
@@ -25,7 +25,7 @@ func TestGetSet(t *testing.T) {
 
 	// Number
 	err := o.Set("number", 42)
-	if err==nil {
+	if err == nil {
 		t.Error("Method Set expected error")
 	}
 }
@@ -73,10 +73,10 @@ func TestLen(t *testing.T) {
 func TestKeys(t *testing.T) {
 	o := NewInstance()
 	ts := map[string]int{
-		"one": 1,
-		"two": 2,
+		"one":   1,
+		"two":   2,
 		"three": 3,
-		"four": 4,
+		"four":  4,
 	}
 
 	for k, v := range ts {
@@ -95,18 +95,18 @@ func TestArrayGet(t *testing.T) {
 	o.Set("arr", []string{"0", "1", "2", "3"})
 
 	_, err := o.ArrGet("arr", 4)
-	if err==nil {
+	if err == nil {
 		t.Error("Error was expected")
 	}
 
 	two, err := o.ArrGet("arr", 3)
-	if two!="3" {
+	if two != "3" {
 		t.Error("Wrong value")
 	}
 
 	o.Set("string", "ELLO GOVNA")
 	_, err = o.ArrGet("string", 0)
-	if err==nil {
+	if err == nil {
 		t.Error("Error was expected")
 	}
 }
@@ -117,10 +117,10 @@ func TestArrayDel(t *testing.T) {
 
 	o.ArrDel("arr", 2)
 	three, err := o.ArrGet("arr", 2)
-	if err!=nil {
+	if err != nil {
 		t.Error(err)
 	}
-	if three!="3" {
+	if three != "3" {
 		t.Error("Wrong value")
 	}
 }
@@ -131,17 +131,17 @@ func TestArraySetAdd(t *testing.T) {
 
 	o.ArrAdd("arr", "four")
 	arr2, _ := o.Get("arr")
-	if len(arr2.([]string))!=5 {
+	if len(arr2.([]string)) != 5 {
 		t.Error("Length should be 4")
 	}
 
 	o.ArrSet("arr", 4, "four")
 	arr2, _ = o.Get("arr")
 	two, err := o.ArrGet("arr", 2)
-	if err!=nil {
+	if err != nil {
 		t.Error(err)
 	}
-	if two!=arr2.([]string)[2] {
+	if two != arr2.([]string)[2] {
 		t.Errorf("Values is not equiel: '%v' != '%v'", two, arr2.([]string)[2])
 	}
 }
@@ -149,30 +149,30 @@ func TestArraySetAdd(t *testing.T) {
 func TestHashGet(t *testing.T) {
 	o := NewInstance()
 	o.Set("hash", map[string]string{
-		"zero": "0",
-		"one": "1",
-		"two": "2",
+		"zero":  "0",
+		"one":   "1",
+		"two":   "2",
 		"three": "3",
 	})
 
 	_, err := o.HashGet("notexistname", "notexistkey")
-	if err==nil {
+	if err == nil {
 		t.Error("Error was expected")
 	}
 
 	_, err = o.HashGet("hash", "notexistkey")
-	if err==nil {
+	if err == nil {
 		t.Error("Error was expected")
 	}
 
 	one, err := o.HashGet("hash", "one")
-	if one!="1" {
+	if one != "1" {
 		t.Error("Wrong value")
 	}
 
 	o.Set("string", "ELLO GOVNA")
 	_, err = o.HashGet("string", "notexistkey")
-	if err==nil {
+	if err == nil {
 		t.Error("Error was expected")
 	}
 }
@@ -180,26 +180,26 @@ func TestHashGet(t *testing.T) {
 func TestHashSet(t *testing.T) {
 	o := NewInstance()
 	o.Set("hash", map[string]string{
-		"zero": "0",
-		"one": "1",
-		"two": "2",
+		"zero":  "0",
+		"one":   "1",
+		"two":   "2",
 		"three": "3",
 	})
 
 	err := o.HashSet("notexistname", "three", "4")
-	if err==nil {
+	if err == nil {
 		t.Error("Error was expected")
 	}
 
 	err = o.HashSet("hash", "four", "4")
 	four, _ := o.HashGet("hash", "four")
-	if four!="4" {
+	if four != "4" {
 		t.Error("Wrong value")
 	}
 
 	_ = o.HashSet("hash", "four", "IV")
 	four, _ = o.HashGet("hash", "four")
-	if four!="IV" {
+	if four != "IV" {
 		t.Error("Wrong value")
 	}
 }
@@ -207,28 +207,28 @@ func TestHashSet(t *testing.T) {
 func TestHashDel(t *testing.T) {
 	o := NewInstance()
 	o.Set("hash", map[string]string{
-		"zero": "0",
-		"one": "1",
-		"two": "2",
+		"zero":  "0",
+		"one":   "1",
+		"two":   "2",
 		"three": "3",
 	})
 
 	err := o.HashDel("notexistname", "notexistkey")
-	if err==nil {
+	if err == nil {
 		t.Error("Error was expected")
 	}
 
 	err = o.HashDel("hash", "notexistkey")
-	if err!=nil {
+	if err != nil {
 		t.Error("Error was not expected")
 	}
 
 	err = o.HashDel("hash", "two")
-	if err!=nil {
+	if err != nil {
 		t.Error("Error was not expected")
 	}
 	_, err = o.HashGet("hash", "two")
-	if err==nil {
+	if err == nil {
 		t.Error("Error was expected")
 	}
 }

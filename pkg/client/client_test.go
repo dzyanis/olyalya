@@ -1,9 +1,9 @@
 package client
 
 import (
-	"testing"
-	"reflect"
 	"flag"
+	"reflect"
+	"testing"
 )
 
 var (
@@ -17,7 +17,6 @@ func init() {
 	flag.Parse()
 	Cln = NewClient(*httpUrl, *httpPort)
 }
-
 
 func TestCreate(t *testing.T) {
 	err := Cln.CreateInstance("dz")
@@ -84,13 +83,12 @@ func TestGetSetArray(t *testing.T) {
 	}
 }
 
-
 func TestArrayElementsGet(t *testing.T) {
 	two, err := Cln.GetArrayElement("numbers", 2)
 	if err != nil {
 		t.Error(err)
 	}
-	if two!="two" {
+	if two != "two" {
 		t.Error("Unexpected result")
 	}
 
@@ -109,7 +107,7 @@ func TestArrayElementsAdd(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if three!="three" {
+	if three != "three" {
 		t.Error("Unexpected result")
 	}
 }
@@ -123,7 +121,7 @@ func TestArrayElementsSet(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if three!="three" {
+	if three != "three" {
 		t.Error("Unexpected result")
 	}
 }
@@ -138,7 +136,7 @@ func TestArrayElementsDel(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if one!="one" {
+	if one != "one" {
 		t.Error(one)
 		t.Error("Unexpected result")
 	}
@@ -151,7 +149,7 @@ func TestGetSetHash(t *testing.T) {
 	}
 
 	primary := map[string]string{
-		"name":	    "Dzyanis Kuzmenka",
+		"name":     "Dzyanis Kuzmenka",
 		"language": "C",
 	}
 	err = Cln.SetHash("user", primary, 0)

@@ -2,16 +2,16 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"github.com/dzyanis/olyalya/pkg/database"
 	"github.com/gorilla/pat"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
-	"io/ioutil"
-	"encoding/json"
 )
 
 var (
@@ -118,29 +118,29 @@ func main() {
 }
 
 func handlerInstanceTTLSet(w http.ResponseWriter, r *http.Request) {
-	body, err := ioutil.ReadAll(r.Body);
+	body, err := ioutil.ReadAll(r.Body)
 	defer r.Body.Close()
-	if  err != nil {
+	if err != nil {
 		handlerJsonError(w, err)
 		return
 	}
 
 	res := new(RequestJsonTTL)
 	err = json.Unmarshal([]byte(body), &res)
-	if  err != nil {
+	if err != nil {
 		handlerJsonError(w, err)
 		return
 	}
 
 	instanceName := r.URL.Query().Get(":instance")
 	instance, err := Db.Get(instanceName)
-	if  err != nil {
+	if err != nil {
 		handlerJsonError(w, err)
 		return
 	}
 
-	err = instance.SetTTL(res.Name, res.Expire);
-	if  err != nil {
+	err = instance.SetTTL(res.Name, res.Expire)
+	if err != nil {
 		handlerJsonError(w, err)
 		return
 	}
@@ -149,28 +149,28 @@ func handlerInstanceTTLSet(w http.ResponseWriter, r *http.Request) {
 }
 
 func handlerInstanceTTLDel(w http.ResponseWriter, r *http.Request) {
-	body, err := ioutil.ReadAll(r.Body);
+	body, err := ioutil.ReadAll(r.Body)
 	defer r.Body.Close()
-	if  err != nil {
+	if err != nil {
 		handlerJsonError(w, err)
 		return
 	}
 
 	res := new(RequestJsonTTL)
 	err = json.Unmarshal([]byte(body), &res)
-	if  err != nil {
+	if err != nil {
 		handlerJsonError(w, err)
 		return
 	}
 
 	instanceName := r.URL.Query().Get(":instance")
 	instance, err := Db.Get(instanceName)
-	if  err != nil {
+	if err != nil {
 		handlerJsonError(w, err)
 		return
 	}
 
-	instance.DelTTL(res.Name);
+	instance.DelTTL(res.Name)
 
 	handlerJsonOk(w)
 }
@@ -179,33 +179,33 @@ func handlerNotFount(w http.ResponseWriter, r *http.Request) {
 	log.Println("Not Found")
 	handlerJson(w, http.StatusNotFound, &RespondJson{
 		"status": "ERROR",
-		"path": r.URL.Path,
+		"path":   r.URL.Path,
 	})
 }
 func handlerInstanceArrAdd(w http.ResponseWriter, r *http.Request) {
-	body, err := ioutil.ReadAll(r.Body);
+	body, err := ioutil.ReadAll(r.Body)
 	defer r.Body.Close()
-	if  err != nil {
+	if err != nil {
 		handlerJsonError(w, err)
 		return
 	}
 
 	res := new(RequestJsonArrayItem)
 	err = json.Unmarshal([]byte(body), &res)
-	if  err != nil {
+	if err != nil {
 		handlerJsonError(w, err)
 		return
 	}
 
 	instanceName := r.URL.Query().Get(":instance")
 	instance, err := Db.Get(instanceName)
-	if  err != nil {
+	if err != nil {
 		handlerJsonError(w, err)
 		return
 	}
 
 	err = instance.ArrAdd(res.Name, res.Value)
-	if  err != nil {
+	if err != nil {
 		handlerJsonError(w, err)
 		return
 	}
@@ -214,63 +214,63 @@ func handlerInstanceArrAdd(w http.ResponseWriter, r *http.Request) {
 }
 
 func handlerInstanceArrGet(w http.ResponseWriter, r *http.Request) {
-	body, err := ioutil.ReadAll(r.Body);
+	body, err := ioutil.ReadAll(r.Body)
 	defer r.Body.Close()
-	if  err != nil {
+	if err != nil {
 		handlerJsonError(w, err)
 		return
 	}
 
 	res := new(RequestJsonArrayItem)
 	err = json.Unmarshal([]byte(body), &res)
-	if  err != nil {
+	if err != nil {
 		handlerJsonError(w, err)
 		return
 	}
 
 	instanceName := r.URL.Query().Get(":instance")
 	instance, err := Db.Get(instanceName)
-	if  err != nil {
+	if err != nil {
 		handlerJsonError(w, err)
 		return
 	}
 
 	value, err := instance.ArrGet(res.Name, res.Index)
-	if  err != nil {
+	if err != nil {
 		handlerJsonError(w, err)
 		return
 	}
 
 	handlerJson(w, http.StatusOK, &RespondJson{
 		"status": "OK",
-		"value": value,
+		"value":  value,
 	})
 }
 
 func handlerInstanceArrDel(w http.ResponseWriter, r *http.Request) {
-	body, err := ioutil.ReadAll(r.Body);
+	body, err := ioutil.ReadAll(r.Body)
 	defer r.Body.Close()
-	if  err != nil {
+	if err != nil {
 		handlerJsonError(w, err)
 		return
 	}
 
 	res := new(RequestJsonArrayItem)
 	err = json.Unmarshal([]byte(body), &res)
-	if  err != nil {
+	if err != nil {
 		handlerJsonError(w, err)
 		return
 	}
 
 	instanceName := r.URL.Query().Get(":instance")
 	instance, err := Db.Get(instanceName)
-	if  err != nil {
+	if err != nil {
 		handlerJsonError(w, err)
 		return
 	}
 
 	err = instance.ArrDel(res.Name, res.Index)
-	if  err != nil {
+	if err != nil {
 		handlerJsonError(w, err)
 		return
 	}
@@ -279,23 +279,23 @@ func handlerInstanceArrDel(w http.ResponseWriter, r *http.Request) {
 }
 
 func handlerInstanceArrSet(w http.ResponseWriter, r *http.Request) {
-	body, err := ioutil.ReadAll(r.Body);
+	body, err := ioutil.ReadAll(r.Body)
 	defer r.Body.Close()
-	if  err != nil {
+	if err != nil {
 		handlerJsonError(w, err)
 		return
 	}
 
 	res := new(RequestJsonArrayItem)
 	err = json.Unmarshal([]byte(body), &res)
-	if  err != nil {
+	if err != nil {
 		handlerJsonError(w, err)
 		return
 	}
 
 	instanceName := r.URL.Query().Get(":instance")
 	instance, err := Db.Get(instanceName)
-	if  err != nil {
+	if err != nil {
 		handlerJsonError(w, err)
 		return
 	}
@@ -305,29 +305,29 @@ func handlerInstanceArrSet(w http.ResponseWriter, r *http.Request) {
 }
 
 func handlerInstanceHashSet(w http.ResponseWriter, r *http.Request) {
-	body, err := ioutil.ReadAll(r.Body);
+	body, err := ioutil.ReadAll(r.Body)
 	defer r.Body.Close()
-	if  err != nil {
+	if err != nil {
 		handlerJsonError(w, err)
 		return
 	}
 
 	res := new(RequestJsonHashItem)
 	err = json.Unmarshal([]byte(body), &res)
-	if  err != nil {
+	if err != nil {
 		handlerJsonError(w, err)
 		return
 	}
 
 	instanceName := r.URL.Query().Get(":instance")
 	instance, err := Db.Get(instanceName)
-	if  err != nil {
+	if err != nil {
 		handlerJsonError(w, err)
 		return
 	}
 
 	err = instance.HashSet(res.Name, res.Key, res.Value)
-	if  err != nil {
+	if err != nil {
 		handlerJsonError(w, err)
 		return
 	}
@@ -336,29 +336,29 @@ func handlerInstanceHashSet(w http.ResponseWriter, r *http.Request) {
 }
 
 func handlerInstanceHashDel(w http.ResponseWriter, r *http.Request) {
-	body, err := ioutil.ReadAll(r.Body);
+	body, err := ioutil.ReadAll(r.Body)
 	defer r.Body.Close()
-	if  err != nil {
+	if err != nil {
 		handlerJsonError(w, err)
 		return
 	}
 
 	res := new(RequestJsonHashItem)
 	err = json.Unmarshal([]byte(body), &res)
-	if  err != nil {
+	if err != nil {
 		handlerJsonError(w, err)
 		return
 	}
 
 	instanceName := r.URL.Query().Get(":instance")
 	instance, err := Db.Get(instanceName)
-	if  err != nil {
+	if err != nil {
 		handlerJsonError(w, err)
 		return
 	}
 
 	err = instance.HashDel(res.Name, res.Key)
-	if  err != nil {
+	if err != nil {
 		handlerJsonError(w, err)
 		return
 	}
@@ -367,36 +367,36 @@ func handlerInstanceHashDel(w http.ResponseWriter, r *http.Request) {
 }
 
 func handlerInstanceHashGet(w http.ResponseWriter, r *http.Request) {
-	body, err := ioutil.ReadAll(r.Body);
+	body, err := ioutil.ReadAll(r.Body)
 	defer r.Body.Close()
-	if  err != nil {
+	if err != nil {
 		handlerJsonError(w, err)
 		return
 	}
 
 	res := new(RequestJsonHashItem)
 	err = json.Unmarshal([]byte(body), &res)
-	if  err != nil {
+	if err != nil {
 		handlerJsonError(w, err)
 		return
 	}
 
 	instanceName := r.URL.Query().Get(":instance")
 	instance, err := Db.Get(instanceName)
-	if  err != nil {
+	if err != nil {
 		handlerJsonError(w, err)
 		return
 	}
 
 	value, err := instance.HashGet(res.Name, res.Key)
-	if  err != nil {
+	if err != nil {
 		handlerJsonError(w, err)
 		return
 	}
 
 	handlerJson(w, http.StatusOK, &RespondJson{
 		"status": "OK",
-		"value": value,
+		"value":  value,
 	})
 }
 
@@ -415,14 +415,14 @@ func handlerDatabaseCreate(w http.ResponseWriter, r *http.Request) {
 		handlerJsonError(w, err)
 		return
 	}
-	handlerJsonOk(w);
+	handlerJsonOk(w)
 }
 
 func handlerDatabaseList(w http.ResponseWriter, r *http.Request) {
 	handlerJson(w, http.StatusOK, &RespondJson{
 		"status": "OK",
-		"count": Db.Len(),
-		"names": Db.Keys(),
+		"count":  Db.Len(),
+		"names":  Db.Keys(),
 	})
 }
 
@@ -437,7 +437,7 @@ func handlerInstanceDestroy(w http.ResponseWriter, r *http.Request) {
 	}
 
 	Db.Delete(data["name"])
-	handlerJsonOk(w);
+	handlerJsonOk(w)
 }
 
 func handlerJson(w http.ResponseWriter, code int, object interface{}) {
@@ -451,7 +451,7 @@ func handlerJsonError(w http.ResponseWriter, err error) {
 	log.Println(err)
 	handlerJson(w, http.StatusInternalServerError, &RespondJson{
 		"status": "ERROR",
-		"error": err.Error(),
+		"error":  err.Error(),
 	})
 }
 
@@ -464,29 +464,29 @@ func handlerJsonOk(w http.ResponseWriter) {
 func handlerInstanceInfo(w http.ResponseWriter, r *http.Request) {
 	instanceName := r.URL.Query().Get(":instance")
 	instance, err := Db.Get(instanceName)
-	if  err != nil {
+	if err != nil {
 		handlerJsonError(w, err)
 		return
 	}
 
 	handlerJson(w, http.StatusOK, &RespondJson{
 		"instance": instanceName,
-		"length": instance.Len(),
-		"names": instance.Keys(),
+		"length":   instance.Len(),
+		"names":    instance.Keys(),
 	})
 }
 
 func handlerInstanceGet(w http.ResponseWriter, r *http.Request) {
 	instanceName := r.URL.Query().Get(":instance")
 	instance, err := Db.Get(instanceName)
-	if  err != nil {
+	if err != nil {
 		handlerJsonError(w, err)
 		return
 	}
 
 	name := r.URL.Query().Get(":name")
 	value, err := instance.Get(name)
-	if  err != nil {
+	if err != nil {
 		handlerJsonError(w, err)
 		return
 	}
@@ -499,7 +499,7 @@ func handlerInstanceGet(w http.ResponseWriter, r *http.Request) {
 func handlerInstanceDel(w http.ResponseWriter, r *http.Request) {
 	instanceName := r.URL.Query().Get(":instance")
 	instance, err := Db.Get(instanceName)
-	if  err != nil {
+	if err != nil {
 		handlerJsonError(w, err)
 		return
 	}
@@ -511,36 +511,36 @@ func handlerInstanceDel(w http.ResponseWriter, r *http.Request) {
 }
 
 func handlerInstanceSetString(w http.ResponseWriter, r *http.Request) {
-	body, err := ioutil.ReadAll(r.Body);
+	body, err := ioutil.ReadAll(r.Body)
 	defer r.Body.Close()
-	if  err != nil {
+	if err != nil {
 		handlerJsonError(w, err)
 		return
 	}
 
 	res := new(RequestJsonString)
 	err = json.Unmarshal([]byte(body), &res)
-	if  err != nil {
+	if err != nil {
 		handlerJsonError(w, err)
 		return
 	}
 
 	instanceName := r.URL.Query().Get(":instance")
 	instance, err := Db.Get(instanceName)
-	if  err != nil {
+	if err != nil {
 		handlerJsonError(w, err)
 		return
 	}
 
 	err = instance.Set(res.Name, res.Value)
-	if  err != nil {
+	if err != nil {
 		handlerJsonError(w, err)
 		return
 	}
 
-	if res.Expire>0 {
-		err = instance.SetTTL(res.Name, res.Expire);
-		if  err != nil {
+	if res.Expire > 0 {
+		err = instance.SetTTL(res.Name, res.Expire)
+		if err != nil {
 			handlerJsonError(w, err)
 			return
 		}
@@ -550,36 +550,36 @@ func handlerInstanceSetString(w http.ResponseWriter, r *http.Request) {
 }
 
 func handlerInstanceSetArray(w http.ResponseWriter, r *http.Request) {
-	body, err := ioutil.ReadAll(r.Body);
+	body, err := ioutil.ReadAll(r.Body)
 	defer r.Body.Close()
-	if  err != nil {
+	if err != nil {
 		handlerJsonError(w, err)
 		return
 	}
 
 	res := new(RequestJsonArray)
 	err = json.Unmarshal([]byte(body), &res)
-	if  err != nil {
+	if err != nil {
 		handlerJsonError(w, err)
 		return
 	}
 
 	instanceName := r.URL.Query().Get(":instance")
 	instance, err := Db.Get(instanceName)
-	if  err != nil {
+	if err != nil {
 		handlerJsonError(w, err)
 		return
 	}
 
 	err = instance.Set(res.Name, res.Value)
-	if  err != nil {
+	if err != nil {
 		handlerJsonError(w, err)
 		return
 	}
 
-	if res.Expire>0 {
-		err = instance.SetTTL(res.Name, res.Expire);
-		if  err != nil {
+	if res.Expire > 0 {
+		err = instance.SetTTL(res.Name, res.Expire)
+		if err != nil {
 			handlerJsonError(w, err)
 			return
 		}
@@ -589,36 +589,36 @@ func handlerInstanceSetArray(w http.ResponseWriter, r *http.Request) {
 }
 
 func handlerInstanceSetHash(w http.ResponseWriter, r *http.Request) {
-	body, err := ioutil.ReadAll(r.Body);
+	body, err := ioutil.ReadAll(r.Body)
 	defer r.Body.Close()
-	if  err != nil {
+	if err != nil {
 		handlerJsonError(w, err)
 		return
 	}
 
 	res := new(RequestJsonHash)
 	err = json.Unmarshal([]byte(body), &res)
-	if  err != nil {
+	if err != nil {
 		handlerJsonError(w, err)
 		return
 	}
 
 	instanceName := r.URL.Query().Get(":instance")
 	instance, err := Db.Get(instanceName)
-	if  err != nil {
+	if err != nil {
 		handlerJsonError(w, err)
 		return
 	}
 
 	err = instance.Set(res.Name, res.Value)
-	if  err != nil {
+	if err != nil {
 		handlerJsonError(w, err)
 		return
 	}
 
-	if res.Expire>0 {
-		err = instance.SetTTL(res.Name, res.Expire);
-		if  err != nil {
+	if res.Expire > 0 {
+		err = instance.SetTTL(res.Name, res.Expire)
+		if err != nil {
 			handlerJsonError(w, err)
 			return
 		}

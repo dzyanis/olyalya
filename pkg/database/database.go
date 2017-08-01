@@ -11,7 +11,7 @@ type DataBase struct {
 }
 
 var (
-	ErrDatabaseInstanceNotExist = errors.New("Instance not exist")
+	ErrDatabaseInstanceNotExist     = errors.New("Instance not exist")
 	ErrDatabaseInstanceAlreadyExist = errors.New("Instance already exist")
 )
 

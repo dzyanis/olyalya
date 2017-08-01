@@ -136,7 +136,7 @@ func TestClose(t *testing.T) {
 func TestParseCommandName(t *testing.T) {
 	ls := NewLexer()
 	lexems, err := ls.Parse(` SET/INDEX/ARRAY value `)
-	if err!=nil {
+	if err != nil {
 		t.Error(err)
 	}
 	if lexems[0] != "SET/INDEX/ARRAY" {
@@ -147,7 +147,7 @@ func TestParseCommandName(t *testing.T) {
 func TestParse(t *testing.T) {
 	ls := NewLexer()
 	terms, err := ls.Parse(`   TEST hello " World!" 42 ["1", "2", "3"] {"zero":"0", "two":"1"}   `)
-	if err!=nil {
+	if err != nil {
 		t.Error(err)
 	}
 	if len(terms) < 6 {

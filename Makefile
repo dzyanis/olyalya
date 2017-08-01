@@ -1,4 +1,4 @@
-.PHONY: server cli
+.PHONY: server cli test
 TOPDIR:=$(shell pwd)
 OLLURL:=localhost
 OLLPORT:=3000
@@ -8,3 +8,6 @@ server:
 
 cli:
 	go run cli/cli.go --http.url=${OLLURL} --http.port=${OLLPORT}
+
+test:
+	go test ./...

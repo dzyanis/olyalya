@@ -32,7 +32,7 @@ func NewConnection(url string) *Connection {
 }
 
 func (c *Connection) Url(uri string) string {
-	return fmt.Sprintf("%s%s", c.url, uri)
+	return fmt.Sprintf("http://%s%s", c.url, uri)
 }
 
 func (c *Connection) request(method string, url string, data map[string]interface{}) (*http.Response, error) {

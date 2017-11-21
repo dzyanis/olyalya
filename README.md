@@ -22,8 +22,11 @@ go install github.com/dzyanis/olyalya/cli
 $GOPATH/bin/cli
 ```
 
-
-Backlog:
+## Tasks
+### Done
+- migrate from [Glide](http://bumptech.github.io/glide/) to [Dep](https://github.com/golang/dep)
+### Doing
+### Backlog
 - add config
 - persistence to disk/db
 - auth

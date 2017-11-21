@@ -1,3 +1,0 @@
-package: github.com/dzyanis/olyalya
-import:
-- package: github.com/gorilla/pat

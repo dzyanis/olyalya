@@ -1,12 +1,12 @@
 package client_test
 
 import (
-	"testing"
+	"bytes"
+	"fmt"
+	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
-	"fmt"
-	"bytes"
-	"io/ioutil"
+	"testing"
 
 	client "github.com/dzyanis/olyalya/pkg/client"
 )
@@ -104,18 +104,18 @@ func TestSelectOk(t *testing.T) {
 //		t.Error("Unexpected result")
 //	}
 
-	//err = cln.Set("one", "1", 0)
-	//if err != nil {
-	//	t.Error(err)
-	//}
-	//
-	//one, err = cln.Get("one")
-	//if err != nil {
-	//	t.Error(err)
-	//}
-	//if one != "1" {
-	//	t.Error("Unexpected result")
-	//}
+//err = cln.Set("one", "1", 0)
+//if err != nil {
+//	t.Error(err)
+//}
+//
+//one, err = cln.Get("one")
+//if err != nil {
+//	t.Error(err)
+//}
+//if one != "1" {
+//	t.Error("Unexpected result")
+//}
 //}
 //
 //func TestGetSetArray(t *testing.T) {

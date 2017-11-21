@@ -26,6 +26,7 @@ $GOPATH/bin/cli
 Backlog:
 - add config
 - persistence to disk/db
-- scaling(on server-side or on client-side, up to you)
 - auth
 - perfomance tests
+- raft
+- scaling(on server-side or on client-side, up to you)

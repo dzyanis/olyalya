@@ -19,7 +19,7 @@ var (
 )
 
 var (
-	httpAddr  = flag.String("http.addr", "http://localhost:3000", "HTTP listen URL")
+	httpAddr = flag.String("http.addr", "http://localhost:3000", "HTTP listen URL")
 )
 
 const HelpInformation = `Command is not exist.

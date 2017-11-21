@@ -13,7 +13,7 @@ func TestGetSet(t *testing.T) {
 	o.Set("foo", bar)
 	v, _ := o.Get("foo")
 	if v != bar {
-		t.Error("Method Get returned unexpected result: %#v != %#v", bar, v, reflect.TypeOf(v))
+		t.Errorf("Method Get returned unexpected result: %#v != %#v (%s)", bar, v, reflect.TypeOf(v))
 	}
 
 	// string

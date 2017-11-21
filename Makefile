@@ -1,4 +1,4 @@
-.PHONY: server cli test build
+.PHONY: server cli test
 TOPDIR:=$(shell pwd)
 OLLURL:=localhost
 OLLPORT:=3000
@@ -10,4 +10,4 @@ cli:
 	go run cli/cli.go --http.addr=http://${OLLURL}:${OLLPORT}
 
 test:
-	go test ./...
+	go tool vet ./. && go test ./...

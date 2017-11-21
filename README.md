@@ -25,11 +25,13 @@ $GOPATH/bin/cli
 ## Tasks
 ### Done
 - migrate from [Glide](http://bumptech.github.io/glide/) to [Dep](https://github.com/golang/dep)
+- builds and versions
 ### Doing
 ### Backlog
+- use logger
 - add config
 - persistence to disk/db
 - auth
 - perfomance tests
-- raft
+- [raft](https://raft.github.io/)
 - scaling(on server-side or on client-side, up to you)

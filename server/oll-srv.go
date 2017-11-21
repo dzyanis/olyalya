@@ -4,6 +4,7 @@ package main
 import (
 	"encoding/json"
 	"flag"
+	"fmt"
 	"github.com/dzyanis/olyalya/pkg/database"
 	"github.com/gorilla/pat"
 	"io/ioutil"
@@ -16,12 +17,13 @@ import (
 
 var (
 	Db         = database.NewDatabase()
-	Version    = "0.0.0"
+	buildName  = ""
 	ServerName = "OLL"
 )
 
 var (
 	httpAddress = flag.String("http.addr", ":3000", "HTTP listen address")
+	version     = flag.Bool("version", false, "Print a version")
 )
 
 type RespondJson map[string]interface{}
@@ -74,6 +76,11 @@ func init() {
 }
 
 func main() {
+	if *version {
+		fmt.Printf("O(lya-lya) server build: %s\n", buildName)
+		os.Exit(0)
+	}
+
 	sigs := make(chan os.Signal, 1)
 	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
 
@@ -112,7 +119,7 @@ func main() {
 		os.Exit(0)
 	}()
 
-	log.Printf("Server %s %s listening on %s", ServerName, Version, *httpAddress)
+	log.Printf("Server %s (build %s) listening on %s", ServerName, buildName, *httpAddress)
 
 	log.Fatal(http.ListenAndServe(*httpAddress, nil))
 }

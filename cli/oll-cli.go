@@ -20,16 +20,50 @@ var (
 
 var (
 	httpAddr = flag.String("http.addr", "http://localhost:3000", "HTTP listen URL")
+	version  = flag.Bool("version", false, "Print a version")
 )
 
-const HelpInformation = `Command is not exist.
-Run 'HELP' for usage or read more on https://github.com/dzyanis/olyalya
-`
+const (
+	HelpInformation = `Command is not exist.
+		Run 'HELP' for usage or read more on https://github.com/dzyanis/olyalya
+	`
+)
 
 var (
-	Client *client.Client
-	Cmd    = cmd.NewCmd()
+	buildName = ""
+	Client    *client.Client
+	Cmd       = cmd.NewCmd()
 )
+
+func main() {
+	if *version {
+		fmt.Printf("O(lya-lya) client build: %s\n", buildName)
+		os.Exit(0)
+	}
+
+	reader := bufio.NewReader(os.Stdin)
+	fmt.Println("O(lya-lya) greets you")
+
+	for {
+		fmt.Printf("%s> ", Client.CurrentInstanceName())
+		cli, err := reader.ReadString('\n')
+		if err != nil {
+			fmt.Printf("ERROR: %s\n", err.Error())
+			continue
+		}
+
+		result, err := Cmd.Run(cli)
+		if err != nil {
+			if cmd.ErrCommandNotExist == err {
+				fmt.Printf(HelpInformation)
+			} else {
+				fmt.Printf("ERROR: %s\n", err.Error())
+			}
+			continue
+		}
+		fmt.Println(result)
+	}
+}
 
 func ValidCountArguments(args []string, min int) error {
 	if len(args) < min {
@@ -557,161 +591,141 @@ func handleDestroy(c *cmd.Cmd, args []string, line string) (string, error) {
 	return "OK", nil
 }
 
+var (
+	commands = map[string]*cmd.Command{
+		"HELP": {
+			Title:       "Function show information about other functions",
+			Description: "Example: HELP <FUNCTION_NAME>",
+			Handler:     handlerHelp,
+		},
+		"ECHO": {
+			Title:       "Prints string",
+			Description: "Example: ECHO \"Hello World!\"",
+			Handler:     handleEcho,
+		},
+		"EXIT": {
+			Title:       "Exit from the program",
+			Description: "",
+			Handler:     handleExit,
+		},
+
+		"CREATE": {
+			Title:       "Create an instance",
+			Description: "Example: CREATE dbname",
+			Handler:     handleInstanceCreate,
+		},
+
+		"LIST": {
+			Title:       "Show list of instance",
+			Description: "Example: LIST",
+			Handler:     handlerList,
+		},
+
+		"SELECT": {
+			Title:       "Select an instance",
+			Description: "Example: SELECT instance_name",
+			Handler:     handleInstanceSelect,
+		},
+
+		"KEYS": {
+			Title:       "Show all keys",
+			Description: "Example: KEYS",
+			Handler:     handleKeys,
+		},
+		"SET": {
+			Title:       "Set value",
+			Description: "Example: SET name \"value\" ttl",
+			Handler:     handleInstanceSet,
+		},
+		"GET": {
+			Title:       "Get value",
+			Description: "Example: GET name",
+			Handler:     handleInstanceGet,
+		},
+		"DEL": {
+			Title:       "Delete value",
+			Description: "Example: DEL name",
+			Handler:     handleInstanceDel,
+		},
+		"TTL/SET": {
+			Title:       "Set time to live",
+			Description: "Example: TTL/SET mayfly 86400",
+			Handler:     handlerSetTTL,
+		},
+		"TTL/DEL": {
+			Title:       "Remove time to live",
+			Description: "Example: TTL/DEL mayfly",
+			Handler:     handlerDeleteTTL,
+		},
+		"ARR/SET": {
+			Title:       "Set array",
+			Description: "Example: ARR/SET name [] ttl",
+			Handler:     handleInstanceArraySet,
+		},
+		"ARR/GET": {
+			Title:       "Get array",
+			Description: "Example: ARR/GET name",
+			Handler:     handleArrayGet,
+		},
+		"ARR/EL/GET": {
+			Title:       "Returns the element associated with index",
+			Description: "Example: ARR/EL/GET name index",
+			Handler:     handleArrayElementGet,
+		},
+		"ARR/EL/ADD": {
+			Title:       "Add the element to an array",
+			Description: "Example: ",
+			Handler:     handleArrayElementAdd,
+		},
+		"ARR/EL/SET": {
+			Title:       "Set the element of an array",
+			Description: "Example: ",
+			Handler:     handleArrayElementSet,
+		},
+		"ARR/EL/DEL": {
+			Title:       "Delete the element of an array",
+			Description: "Example:",
+			Handler:     handleArrayElementDel,
+		},
+		"HASH/GET": {
+			Title:       "Get a hash",
+			Description: "Example: HASH/GET name",
+			Handler:     handleHashGet,
+		},
+		"HASH/SET": {
+			Title:       "Set a hash",
+			Description: "Example: HASH/SET name {}",
+			Handler:     handlerHashSet,
+		},
+		"HASH/EL/GET": {
+			Title:       "Get the element of a hash",
+			Description: "Example:",
+			Handler:     handleHashElementGet,
+		},
+		"HASH/EL/SET": {
+			Title:       "Set the element of a hash",
+			Description: "Example:",
+			Handler:     handleHashElementSet,
+		},
+		"HASH/EL/DEL": {
+			Title:       "Delete the element of a hash",
+			Description: "Example:",
+			Handler:     handleHashElementDel,
+		},
+		"DESTROY": {
+			Title:       "Remove instance",
+			Description: "Example: DESTROY instance_name",
+			Handler:     handleDestroy,
+		},
+	}
+)
+
 func init() {
 	flag.Parse()
 
 	Client = client.NewClient(*httpAddr)
 
-	Cmd.Add("HELP", &cmd.Command{
-		Title:       "Function show information about other functions",
-		Description: "Example: HELP <FUNCTION_NAME>",
-		Handler:     handlerHelp,
-	})
-	Cmd.Add("ECHO", &cmd.Command{
-		Title:       "Prints string",
-		Description: "Example: ECHO \"Hello World!\"",
-		Handler:     handleEcho,
-	})
-	Cmd.Add("EXIT", &cmd.Command{
-		Title:       "Exit from the program",
-		Description: "",
-		Handler:     handleExit,
-	})
-
-	Cmd.Add("CREATE", &cmd.Command{
-		Title:       "Create an instance",
-		Description: "Example: CREATE dbname",
-		Handler:     handleInstanceCreate,
-	})
-
-	Cmd.Add("LIST", &cmd.Command{
-		Title:       "Show list of instance",
-		Description: "Example: LIST",
-		Handler:     handlerList,
-	})
-
-	Cmd.Add("SELECT", &cmd.Command{
-		Title:       "Select an instance",
-		Description: "Example: SELECT instance_name",
-		Handler:     handleInstanceSelect,
-	})
-
-	Cmd.Add("KEYS", &cmd.Command{
-		Title:       "Show all keys",
-		Description: "Example: KEYS",
-		Handler:     handleKeys,
-	})
-	Cmd.Add("SET", &cmd.Command{
-		Title:       "Set value",
-		Description: "Example: SET name \"value\" ttl",
-		Handler:     handleInstanceSet,
-	})
-	Cmd.Add("GET", &cmd.Command{
-		Title:       "Get value",
-		Description: "Example: GET name",
-		Handler:     handleInstanceGet,
-	})
-	Cmd.Add("DEL", &cmd.Command{
-		Title:       "Delete value",
-		Description: "Example: DEL name",
-		Handler:     handleInstanceDel,
-	})
-
-	Cmd.Add("TTL/SET", &cmd.Command{
-		Title:       "Set time to live",
-		Description: "Example: TTL/SET mayfly 86400",
-		Handler:     handlerSetTTL,
-	})
-	Cmd.Add("TTL/DEL", &cmd.Command{
-		Title:       "Remove time to live",
-		Description: "Example: TTL/DEL mayfly",
-		Handler:     handlerDeleteTTL,
-	})
-
-	Cmd.Add("ARR/SET", &cmd.Command{
-		Title:       "Set array",
-		Description: "Example: ARR/SET name [] ttl",
-		Handler:     handleInstanceArraySet,
-	})
-	Cmd.Add("ARR/GET", &cmd.Command{
-		Title:       "Get array",
-		Description: "Example: ARR/GET name",
-		Handler:     handleArrayGet,
-	})
-	Cmd.Add("ARR/EL/GET", &cmd.Command{
-		Title:       "Returns the element associated with index",
-		Description: "Example: ARR/EL/GET name index",
-		Handler:     handleArrayElementGet,
-	})
-	Cmd.Add("ARR/EL/ADD", &cmd.Command{
-		Title:       "Add the element to an array",
-		Description: "Example: ",
-		Handler:     handleArrayElementAdd,
-	})
-	Cmd.Add("ARR/EL/SET", &cmd.Command{
-		Title:       "Set the element of an array",
-		Description: "Example: ",
-		Handler:     handleArrayElementSet,
-	})
-	Cmd.Add("ARR/EL/DEL", &cmd.Command{
-		Title:       "Delete the element of an array",
-		Description: "Example:",
-		Handler:     handleArrayElementDel,
-	})
-
-	Cmd.Add("HASH/GET", &cmd.Command{
-		Title:       "Get a hash",
-		Description: "Example: HASH/GET name",
-		Handler:     handleHashGet,
-	})
-	Cmd.Add("HASH/SET", &cmd.Command{
-		Title:       "Set a hash",
-		Description: "Example: HASH/SET name {}",
-		Handler:     handlerHashSet,
-	})
-	Cmd.Add("HASH/EL/GET", &cmd.Command{
-		Title:       "Get the element of a hash",
-		Description: "Example:",
-		Handler:     handleHashElementGet,
-	})
-	Cmd.Add("HASH/EL/SET", &cmd.Command{
-		Title:       "Set the element of a hash",
-		Description: "Example:",
-		Handler:     handleHashElementSet,
-	})
-	Cmd.Add("HASH/EL/DEL", &cmd.Command{
-		Title:       "Delete the element of a hash",
-		Description: "Example:",
-		Handler:     handleHashElementDel,
-	})
-	Cmd.Add("DESTROY", &cmd.Command{
-		Title:       "Remove instance",
-		Description: "Example: DESTROY instance_name",
-		Handler:     handleDestroy,
-	})
-}
-
-func main() {
-	reader := bufio.NewReader(os.Stdin)
-	fmt.Println("O(lya-lya) greets you")
-
-	for {
-		fmt.Printf("%s> ", Client.CurrentInstanceName())
-		cli, err := reader.ReadString('\n')
-		if err != nil {
-			fmt.Printf("ERROR: %s\n", err.Error())
-			continue
-		}
-
-		result, err := Cmd.Run(cli)
-		if err != nil {
-			if cmd.ErrCommandNotExist == err {
-				fmt.Printf(HelpInformation)
-			} else {
-				fmt.Printf("ERROR: %s\n", err.Error())
-			}
-			continue
-		}
-		fmt.Println(result)
+	for name, command := range commands {
+		Cmd.Add(name, command)
 	}
 }

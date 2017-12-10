@@ -1,0 +1,9 @@
+FROM golang
+
+ADD . /go/src/github.com/dzyanis/olyalya
+
+RUN go install github.com/dzyanis/olyalya/apps/server
+
+ENTRYPOINT /go/bin/server
+
+EXPOSE 3000

@@ -4,9 +4,9 @@ OLL is simple implementation of Redis-like in-memory cache database with HTTP/JS
 It's not the best database, but good example of.
 
 It includes three part:
-- [Server](server/API.md)
+- [Server](apps/server/API.md)
 - [Client Library](pkg/client/)
-- [Commondline Client](cli/COMMANDS.md)
+- [Commondline Client](apps/client/COMMANDS.md)
 
 
 ## How to run
@@ -27,6 +27,7 @@ $GOPATH/bin/cli
 - migrate from [Glide](http://bumptech.github.io/glide/) to [Dep](https://github.com/golang/dep)
 - builds and versions
 ### Doing
+- dockerization
 ### Backlog
 - use logger
 - add config

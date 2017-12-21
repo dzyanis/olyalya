@@ -120,18 +120,26 @@ func (lx *Lexer) stepNotOpen(ch byte) {
 	if lx.IsArrayBegin(ch) {
 		lx.Open(TERM_ARRAY)
 		lx.termSet(`[`)
-	} else if lx.IsHashBegin(ch) {
+		return
+	}
+
+	if lx.IsHashBegin(ch) {
 		lx.Open(TERM_HASH)
 		lx.termSet(`{`)
-	} else if lx.IsStringBegin(ch) {
+		return
+	}
+
+	if lx.IsStringBegin(ch) {
 		lx.Open(TERM_STRING)
 		lx.termSet(`"`)
-	} else if !lx.IsSpace(ch) {
+		return
+	}
+
+	if !lx.IsSpace(ch) {
 		lx.Open(TERM_NAME)
 		lx.termSet(string(ch))
-	} else {
-		//return ErrTermIsWrong
 	}
+	return
 }
 
 func (lx *Lexer) stepOpen(ch byte) {

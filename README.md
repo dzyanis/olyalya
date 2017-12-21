@@ -6,7 +6,7 @@ It's not the best database, but good example of.
 It includes three part:
 - [Server](server/API.md)
 - [Client Library](pkg/client/)
-- [Commondline Client](cli/COMMANDS.md)
+- [Commandline Client](cli/COMMANDS.md)
 
 
 ## How to run
@@ -24,7 +24,7 @@ $GOPATH/bin/cli
 
 ## Tasks
 ### Done
-- migrate from [Glide](http://bumptech.github.io/glide/) to [Dep](https://github.com/golang/dep)
+- migrate from [Glide](https://github.com/Masterminds/glide) to [Dep](https://github.com/golang/dep)
 - builds and versions
 ### Doing
 ### Backlog

@@ -35,3 +35,4 @@ $GOPATH/bin/cli
 - perfomance tests
 - [raft](https://raft.github.io/)
 - scaling(on server-side or on client-side, up to you)
+- pass [Go Report Card](https://goreportcard.com/report/github.com/dzyanis/olyalya)

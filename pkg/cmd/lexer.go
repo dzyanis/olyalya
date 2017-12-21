@@ -116,56 +116,64 @@ func (lx *Lexer) Parse(cmd string) ([]string, error) {
 	return lx.terms, nil
 }
 
+func (lx *Lexer) stepNotOpen(ch byte) {
+	if lx.IsArrayBegin(ch) {
+		lx.Open(TERM_ARRAY)
+		lx.termSet(`[`)
+	} else if lx.IsHashBegin(ch) {
+		lx.Open(TERM_HASH)
+		lx.termSet(`{`)
+	} else if lx.IsStringBegin(ch) {
+		lx.Open(TERM_STRING)
+		lx.termSet(`"`)
+	} else if !lx.IsSpace(ch) {
+		lx.Open(TERM_NAME)
+		lx.termSet(string(ch))
+	} else {
+		//return ErrTermIsWrong
+	}
+}
+
+func (lx *Lexer) stepOpen(ch byte) {
+	switch lx.TermType() {
+	case TERM_ARRAY:
+		if lx.IsArrayEnd(ch) {
+			lx.termAdd(`]`)
+			lx.Close()
+		} else {
+			lx.termAdd(string(ch))
+		}
+	case TERM_HASH:
+		if lx.IsHashEnd(ch) {
+			lx.termAdd(`}`)
+			lx.Close()
+		} else {
+			lx.termAdd(string(ch))
+		}
+	case TERM_STRING:
+		if lx.IsStringEnd(ch) && !lx.IsPreviusCharEscape() {
+			lx.termAdd(`"`)
+			lx.Close()
+		} else {
+			lx.termAdd(string(ch))
+		}
+	case TERM_NAME:
+		if lx.IsSpace(ch) {
+			lx.Close()
+		} else {
+			lx.termAdd(string(ch))
+		}
+	}
+}
+
 func (lx *Lexer) Step(ch byte) error {
 	if !lx.IsStatusOpen() {
-		if lx.IsArrayBegin(ch) {
-			lx.Open(TERM_ARRAY)
-			lx.termSet(`[`)
-		} else if lx.IsHashBegin(ch) {
-			lx.Open(TERM_HASH)
-			lx.termSet(`{`)
-		} else if lx.IsStringBegin(ch) {
-			lx.Open(TERM_STRING)
-			lx.termSet(`"`)
-		} else if !lx.IsSpace(ch) {
-			lx.Open(TERM_NAME)
-			lx.termSet(string(ch))
-		} else {
-			//return ErrTermIsWrong
-		}
+		lx.stepNotOpen(ch)
 		return nil
 	}
 
 	if lx.IsStatusOpen() {
-		switch lx.TermType() {
-		case TERM_ARRAY:
-			if lx.IsArrayEnd(ch) {
-				lx.termAdd(`]`)
-				lx.Close()
-			} else {
-				lx.termAdd(string(ch))
-			}
-		case TERM_HASH:
-			if lx.IsHashEnd(ch) {
-				lx.termAdd(`}`)
-				lx.Close()
-			} else {
-				lx.termAdd(string(ch))
-			}
-		case TERM_STRING:
-			if lx.IsStringEnd(ch) && !lx.IsPreviusCharEscape() {
-				lx.termAdd(`"`)
-				lx.Close()
-			} else {
-				lx.termAdd(string(ch))
-			}
-		case TERM_NAME:
-			if lx.IsSpace(ch) {
-				lx.Close()
-			} else {
-				lx.termAdd(string(ch))
-			}
-		}
+		lx.stepOpen(ch)
 	}
 
 	return nil
